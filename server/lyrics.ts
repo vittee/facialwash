@@ -71,7 +71,7 @@ function parse_line(line: string): LineResult {
 }
 
 export function parse_lyric(data: any): Lyric {
-  const lines: LineResult[] = data.toString().split(/(\r\n|\n)/).map(parse_line);
+  const lines: LineResult[] = data.toString().replace(/\r\n/, "\n").split(/\n/).map(parse_line);
 
   const infos = _.defaults(_.fromPairs(_(lines)
     .map(l => l && l.infos)
@@ -136,8 +136,8 @@ export function parse_lyric(data: any): Lyric {
       const skipCount = nextIndex - index - 1;
 
       if (skipCount > 0) {
-        const duration = (next.time - current.time) / skipCount + 1;
-        const newTimes = _.map(Array(skipCount), (t,i) => current.time+((i+1)*duration));
+        const duration = (next.time - current.time) / (skipCount + 1);
+        const newTimes = _.map(Array(skipCount), (t,i) => current.time+(i*duration));
 
         if (newTimes[0] < current.time + 4000) {
           newTimes[0] += 4000;
