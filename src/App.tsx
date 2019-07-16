@@ -1,25 +1,18 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { useOvermind } from 'overminds';
+import { Lyrics } from 'components/Lyrics';
 
-const App: React.FC = () => {
+const App: React.FC = (props) => {
+  console.log('App render');
+
+  const { state } = useOvermind();
+
+  const track = state.currentTrack;
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <Lyrics track={track} />
+    </>
   );
 }
 
