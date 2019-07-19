@@ -1,3 +1,11 @@
+$font: 'Bai Jamjuree';
+
+@font-face {
+  font-family: $font;
+  src: local($font), url(./BaiJamjuree-Regular.ttf) format('truetype');
+}
+
 body {
   margin: 0;
+  font-family: $font;
 }
