@@ -40,6 +40,19 @@ liquidsoap.on('track', track => {
   io.emit('track', track, Date.now());
 });
 
+let lastTick = Date.now();
+
+setInterval(() => {
+  const now = Date.now();
+  const delta = now - lastTick;
+
+  if (currentTrack) {
+    currentTrack.position_ms += delta;
+  }
+
+  lastTick = now;
+}, 10);
+
 const port = process.env.PORT || 4000;
 server.listen(port);
 
