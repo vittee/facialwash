@@ -1,6 +1,11 @@
 import express, { Router } from 'express';
 import { EventEmitter } from 'events';
 import _ from 'lodash';
+import { Track } from 'common/track';
+
+declare interface LiquidsoapHandler {
+  on(event: 'track', listener:(track: Track) => void): this;
+}
 
 class LiquidsoapHandler extends EventEmitter {
   constructor(public router: Router) {

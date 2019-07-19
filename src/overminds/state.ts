@@ -1,4 +1,4 @@
-import { Track } from "./effects/socket";
+import { Track } from "common/track";
 
 type State = {
   currentTrack: Track | undefined,

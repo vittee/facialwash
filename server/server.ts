@@ -5,7 +5,8 @@ import SocketIO from 'socket.io';
 import path from 'path';
 import liquidsoap from './liquidsoap';
 import bodyParser from 'body-parser';
-import { parse_lyric, Lyric } from './lyrics';
+import { parse_lyric } from './lyrics';
+import { Track } from 'common/track';
 
 const app = express();
 const server = http.createServer(app);

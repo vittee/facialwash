@@ -1,28 +1,7 @@
 import io from 'socket.io-client';
+import { Track } from 'common/track';
 
 let socket: SocketIOClient.Socket;
-
-interface KeyValue {
-  [index: string]: any;
-}
-
-type LyricLine = [number, string];
-
-type Timeline = [LyricLine];
-
-export interface Lyrics {
-  infos: KeyValue;
-  timeline: Timeline;
-}
-
-export interface Track {
-  id: string,
-  frame_duration: number;
-  sending_time_ms: number;
-  position_ms: number;
-  meta: KeyValue;
-  lyrics?: Lyrics;
-}
 
 export interface OnTrack {
   (track: Track): void;
