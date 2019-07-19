@@ -1,7 +1,10 @@
 import React from 'react';
-import { Track } from 'overminds/effects/socket';
+import { Ticker, Line, Container } from './elements';
+import { Track } from 'common/track';
 
 interface Props {
+  lines: number;
+  lineHeight: number;
   track: Track | undefined;
 }
 
@@ -39,12 +42,7 @@ export class Lyrics extends React.Component<Props> {
   componentDidUpdate(prev: Props) {
     const { track } = this.props;
 
-    const prev_id = prev.track && prev.track.id;
-    const current_id = track && track.id;
-
     if (prev.track !== track) {
-      console.log('track changed');
-
       this.position = (track && track.position_ms) || 0;
       this.setState({ line: undefined });
     }
@@ -61,17 +59,22 @@ export class Lyrics extends React.Component<Props> {
         const { line } = this.state;
 
         let foundLine = line;
+        let newLine = null;
 
-        let i = line! + 1 || 0;
-        while (i < timeline.length) {
-          let t = timeline[i][0];
+        while (newLine !== foundLine) {
+          newLine = foundLine;
 
-          if (t <= this.position + LATENCY_COMPENSATION) {
-            foundLine = i;
-            break;
+          let i = foundLine! + 1 || 0;
+          while (i < timeline.length) {
+            let t = timeline[i][0];
+
+            if (t <= this.position + LATENCY_COMPENSATION) {
+              foundLine = i;
+              break;
+            }
+
+            i++;
           }
-
-          i++;
         }
 
         if (foundLine !== line) {
@@ -84,7 +87,7 @@ export class Lyrics extends React.Component<Props> {
   }
 
   render() {
-    const { track } = this.props;
+    const { track, lineHeight, lines } = this.props;
 
     if (!track) {
       return (
@@ -94,19 +97,23 @@ export class Lyrics extends React.Component<Props> {
       )
     }
 
-    const { lyrics, meta } = track;
+    const { lyrics } = track;
     const timeline = lyrics && lyrics.timeline;
+
     const { line } = this.state;
+    let topLine = (line || 0) - (Math.floor( lines / 2) - 1);
+    if (topLine < 0) topLine = 0;
 
     return (
-      <>
-        Lyrics {meta['title']} Line: {line}
-        {timeline && timeline.map(([ts, t], i) => (
-          <h2 key={`${ts}_${i}`} style={{ color: i === line ? 'red' : 'black' }}>
-            #{i} [{ts.toFixed(2)}] {t}
-          </h2>
-        ))}
-      </>
+      <Container>
+        <Ticker {...{ topLine, lineHeight, lines }}>
+          {timeline && timeline.map(([ts, t], i) => (
+            <Line active={line === i} {...{ lineHeight }} key={`${ts}_${i}`}>
+              {t}
+            </Line>
+          ))}
+        </Ticker>
+      </Container>
     );
   }
 }
