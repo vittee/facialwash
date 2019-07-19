@@ -140,7 +140,7 @@ export function parse_lyric(data: any): Lyric {
         const newTimes = _.map(Array(skipCount), (t,i) => current.time+(i*duration));
 
         if (newTimes[0] < current.time + 4000) {
-          newTimes[0] += 4000;
+          newTimes[0] += current.time + 4000;
         }
 
         let filler = _(newTimes)
