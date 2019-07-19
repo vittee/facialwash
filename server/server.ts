@@ -22,7 +22,17 @@ if (process.env.NODE_ENV !== 'development') {
 app.use(bodyParser.json());
 app.use('/liq', liquidsoap.router);
 
+let currentTrack: Track | undefined;
+
+io.on('connection', socket => {
+  if (currentTrack) {
+    socket.emit('track', currentTrack, Date.now());
+  }
+});
+
 liquidsoap.on('track', track => {
+  currentTrack = track;
+
   if (track.meta.lyrics) {
     track.lyrics = parse_lyric(track.meta.lyrics);
   }
