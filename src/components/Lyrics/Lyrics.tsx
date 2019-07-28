@@ -1,5 +1,6 @@
 import React from 'react';
-import { Ticker, Line, Container } from './elements';
+import _ from 'lodash';
+import { Line, Container, Ticker } from './elements';
 import { Track } from 'common/track';
 
 interface Props {
@@ -8,15 +9,17 @@ interface Props {
   track: Track | undefined;
 }
 
-const LATENCY_COMPENSATION = -800;
+const LATENCY_COMPENSATION = -400;
 
 export class Lyrics extends React.Component<Props> {
   private raf = 0;
   private lastTick = Date.now();
   private position = 0;
+  private lineElements: HTMLElement[] = [];
+  private tickerEl = React.createRef<Ticker>();
 
-  state: { line: number | undefined } = {
-    line: undefined
+  state: { line: number } = {
+    line: 0
   }
 
   private animate() {
@@ -31,11 +34,23 @@ export class Lyrics extends React.Component<Props> {
     });
   }
 
+  private resizeHandler = _.debounce(() => {
+    if (this.tickerEl.current) {
+      console.log('Resize');
+      const topLine = this.getTopLine(this.state.line);
+      const y = this.getPosition(topLine);
+      this.tickerEl.current.setPosition(y);
+    }
+  });
+
   componentDidMount() {
     this.animate();
+    window.addEventListener('resize', this.resizeHandler);
+    console.log('Did mount');
   }
 
   componentWillUnmount() {
+    window.removeEventListener('resize', this.resizeHandler);
     cancelAnimationFrame(this.raf);
   }
 
@@ -43,8 +58,13 @@ export class Lyrics extends React.Component<Props> {
     const { track } = this.props;
 
     if (prev.track !== track) {
+      const timeline = (track && track.lyrics && track.lyrics.timeline) || [];
+
       this.position = (track && track.position_ms) || 0;
-      this.setState({ line: undefined });
+      this.lastTick = Date.now();
+      this.lineElements = Array(timeline.length).fill(0);
+      this.setState({ line: 0 });
+      this.updateLine();
     }
   }
 
@@ -86,6 +106,31 @@ export class Lyrics extends React.Component<Props> {
     }
   }
 
+  private storeLinePosition(el: HTMLDivElement | null, index: number) {
+    if (el && this.lineElements[index] !== el) {
+      this.lineElements[index] = el;
+    }
+  }
+
+  private getTopLine(line: number) {
+    const { lines } = this.props;
+    let introLines = Math.floor(lines / 2);
+    let topLine = (line || 0) - (introLines - 1);
+    if (topLine < 0) topLine = 0;
+
+    return topLine;
+  }
+
+  private calculatePosition(line: number) {
+    const heights = Math.floor(window.innerHeight / this.props.lines);
+    return (line >= 0 ? line : 0) * heights;
+  }
+
+  private getPosition(index: number) {
+    const el = this.lineElements[index];
+    return el ? el.offsetTop : this.calculatePosition(index);
+  }
+
   render() {
     const { track, lineHeight, lines } = this.props;
 
@@ -101,14 +146,22 @@ export class Lyrics extends React.Component<Props> {
     const timeline = lyrics && lyrics.timeline;
 
     const { line } = this.state;
-    let topLine = (line || 0) - (Math.floor( lines / 2) - 1);
-    if (topLine < 0) topLine = 0;
+    const topLine = this.getTopLine(line);
+
+    let introLines = Math.floor(lines / 2);
 
     return (
       <Container>
-        <Ticker {...{ topLine, lineHeight, lines }}>
+        <Ticker ref={this.tickerEl} position={this.getPosition(topLine)} {...{ lineHeight, lines }}>
           {timeline && timeline.map(([ts, t], i) => (
-            <Line active={line === i} {...{ lineHeight }} key={`${ts}_${i}`}>
+            <Line
+              key={i}
+              ref={el => this.storeLinePosition(el, i)}
+              dim={ i < line }
+              active={ line === i }
+              zoom={i < introLines || topLine === 0 || i === timeline.length - 1}
+              {...{ lineHeight }}
+            >
               {t}
             </Line>
           ))}

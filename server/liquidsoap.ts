@@ -33,7 +33,9 @@ router.post('/track', (req, res) => {
     sending_time_ms,
     position_ms,
     meta
-  })
+  });
+
+  res.end();
 });
 
 export default handler;

@@ -1,19 +1,30 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import styled from "styled-components";
+import classNames from 'classnames';
 import _ from 'lodash';
 
 interface LineProps {
   active: boolean;
   lineHeight: number;
+  zoom: boolean;
+  dim: boolean;
 }
 
-export interface Props {
-  lineHeight: number;
+interface LineLayoutProps {
   lines: number;
-  topLine: number;
+  lineHeight: number;
 }
+
+interface PositionProps {
+  position: number;
+}
+
+export interface Props extends LineLayoutProps, PositionProps {
+
+};
 
 export const InnerContainer = styled.div`
+  background-color: rgb(2, 2, 30);
   height: 100%;
   overflow: hidden;
 `;
@@ -22,19 +33,19 @@ const Decorator = styled.div`
   position: absolute;
   left: 0;
   right: 0;
-  height: calc(1.8em * 2);
+  height: calc(1.8em * 4);
   pointer-events: none;
   z-index: 2;
 `;
 
 const TopDecorator = styled(Decorator)`
   top: 0;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0), white);
+  background: linear-gradient(to top, rgba(0, 0, 0, 0), black);
 `;
 
 const BottomDecorator = styled(Decorator)`
   bottom: 0;
-  background: linear-gradient(to bottom, rgba(0, 0, 0, 0), white);
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0), black);
 `;
 
 export const Container: React.FC = ({ children }) => {
@@ -47,65 +58,85 @@ export const Container: React.FC = ({ children }) => {
   )
 }
 
-function calcTransformation(pos: number, max: number) {
-  const heights = Math.floor(window.innerHeight / max);
-  return -(pos >= 0 ? pos : 0) * heights;
-}
+const TickerContainer = styled.div<LineLayoutProps>`
+  font-size: calc(100vh / (${props => props.lines} * ${props => props.lineHeight}));
+`;
 
-export const TickerScroller = styled.div.attrs<Props>(props => {
-  const { lines, topLine, lineHeight } = props;
-  const y = calcTransformation(topLine, lines);
+const TickerScroller = styled.div.attrs<PositionProps>(props => {
+  const { position } = props;
 
   return ({
+    className: classNames({ smooth: position > 0}),
     style: {
-      fontSize: `calc(100vh / (${lines} * ${lineHeight}))`,
-      transform: `translate(0px, ${y}px)`,
-      transition: topLine ? 'transform 1s ease' : undefined
+      transform: `translate(0px, ${-position}px)`,
     }
   });
-})<Props>`
+})<PositionProps>`
   display: flex;
   flex-direction: column;
   text-align: center;
   white-space: nowrap;
+  will-change: transform;
+
+  transition: transform 0.1s ease-out;
+
+  &.smooth {
+    transition: transform 1s ease;
+  }
 `;
 
-export const Ticker: React.FC<Props> = (props) => {
-  const el = useRef<HTMLDivElement>(null);
+export class Ticker extends React.Component<Props> {
+  private ref = React.createRef<HTMLDivElement>();
 
-  useEffect(() => {
-    const resizeHandler = _.throttle(_.debounce(() => {
-      if (el.current) {
-        console.log('Resizing', Date.now())
-        const { lines, topLine } = props;
-        const y = calcTransformation(topLine, lines);
-        el.current.style.transform = `translate(0px, ${y}px)`;
-      }
-    }, 50), 500);
-
-    window.addEventListener('resize', resizeHandler);
-
-    return () => {
-      window.removeEventListener('resize', resizeHandler);
+  setPosition(position: number) {
+    const el = this.ref.current;
+    if (el) {
+      el.style.transform = `translate(0px, ${-position}px)`;
     }
-  });
+  }
 
-  return (
-    <TickerScroller {...props} ref={el} />
-  )
+  render() {
+    const { lines, lineHeight, position, children } = this.props;
+    return (
+      <TickerContainer {...{ lines, lineHeight } }>
+        <TickerScroller ref={this.ref} {...{position}}>
+          {children}
+        </TickerScroller>
+      </TickerContainer>
+    );
+  }
 }
 
 export const Line = styled.div.attrs<LineProps>(props => {
-  const val = `${props.lineHeight}em`;
+  const { zoom, active, dim } = props;
 
   return ({
-    style: {
-      color: props.active ? 'red' : 'black',
-      lineHeight: val,
-      minHeight: val
-    }
+    className: classNames({
+      zoom: zoom || active,
+      active,
+      dim
+    })
   });
 
 })<LineProps>`
-  transition: color 0.6s ease;
+  color: rgba(80, 80, 200, 0.6);
+  transition: color 0.3s ease, font-size 1s ease, text-shadow 1.5s ease;
+
+  line-height: ${props => props.lineHeight}em;
+  min-height: ${props => props.lineHeight}em;
+
+  user-select: none;
+
+  &.zoom {
+    font-size: 1.1234em;
+  }
+
+  &.active {
+    color: rgb(222, 222, 255);
+    text-shadow: 0px 0px 22px white, 2px 2px 1px rgba(100, 100, 255, 0.8);
+  }
+
+  &.dim {
+   color: rgba(100, 100, 180, 0.3);
+  }
 `;
