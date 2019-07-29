@@ -59,7 +59,7 @@ function parse_line(line: string): LineResult {
 
 export function parse_lyric(data: any): Lyrics {
   const lines: LineResult[] = data.toString()
-    .replace(/\r\n/, "\n")
+    .replace(/\r\n/g, "\n")
     .split(/\n/)
     .map(parse_line);
 
@@ -96,17 +96,17 @@ export function parse_lyric(data: any): Lyrics {
     })
     .value();
 
-  const isTimeNull = (l: any) => !_.isNull(l.time);
+  const hasTime = (l: any) => !_.isNull(l.time);
 
   if (_.some(timeline, _.isObject)) {
     // Trim nulls from head and tail
-    const firstIndex = _.findIndex(timeline, isTimeNull);
+    const firstIndex = _.findIndex(timeline, hasTime);
 
     if (firstIndex > 0) {
       timeline.splice(0, firstIndex);
     }
 
-    const lastIndex = _.findLastIndex(timeline, isTimeNull);
+    const lastIndex = _.findLastIndex(timeline, hasTime);
 
     if (lastIndex < timeline.length) {
       timeline.splice(lastIndex + 1, timeline.length - lastIndex - 1);
@@ -115,7 +115,7 @@ export function parse_lyric(data: any): Lyrics {
     let index = 0;
     let length = timeline.length;
     while (index < length) {
-      const nextIndex = _.findIndex(timeline, isTimeNull, index + 1);
+      const nextIndex = _.findIndex(timeline, hasTime, index + 1);
 
       if (nextIndex < 0) {
         break;
@@ -136,13 +136,13 @@ export function parse_lyric(data: any): Lyrics {
       const skipCount = nextIndex - index - 1;
 
       if (skipCount > 0) {
-        const idling_time = current.time + 4000;
+        const idleingTime = _.min([current.time + 6000, next.time]);
 
-        const duration = (next.time - idling_time) / (skipCount + 1);
+        const duration = (next.time - idleingTime) / skipCount;
         const newTimes = _.map(Array(skipCount), (t,i) => current.time+(i*duration));
 
         let filler = _(newTimes)
-          .map(t => _.clamp(t, idling_time, next.time))
+          .map(t => _.clamp(t, idleingTime, next.time))
           .sort()
           .map(time => ({ time, text: ''}))
           .value();
