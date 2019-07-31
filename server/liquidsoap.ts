@@ -22,7 +22,7 @@ router.post('/track', (req, res) => {
   console.log('Rcvd track', body);
 
   const meta = _.omit(body, 'frame_duration', 'sending_time_ms', 'position_ms')
-  let { sending_time_ms, position_ms, frame_duration } = body;
+  let { sending_time_ms, position_ms, frame_duration, filename } = body;
 
   sending_time_ms = +sending_time_ms;
   position_ms =  (+position_ms) + (Date.now() - sending_time_ms);
@@ -32,7 +32,8 @@ router.post('/track', (req, res) => {
     frame_duration,
     sending_time_ms,
     position_ms,
-    meta
+    meta,
+    filename
   });
 
   res.end();
