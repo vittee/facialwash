@@ -1,3 +1,5 @@
+import { IPicture } from "music-metadata";
+
 interface KeyValue {
   [index: string]: any;
 }
@@ -18,4 +20,7 @@ export interface Track {
   position_ms: number;
   meta: KeyValue;
   lyrics?: Lyrics;
+  filename?: string;
+  picture?: IPicture;
+  colors?: string[];
 }
