@@ -9,6 +9,7 @@ body {
   margin: 0;
   font-family: $font;
   font-size: calc(100vh / 30);
+  overflow: hidden;
 }
 
 #root {
