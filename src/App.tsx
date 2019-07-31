@@ -14,7 +14,6 @@ const TitleBox = styled.div`
 `;
 
 const TitleText = styled.div`
-  transition: background-image 0.6s ease;
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
