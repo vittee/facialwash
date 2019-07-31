@@ -1,15 +1,33 @@
 import React from 'react';
 import _ from 'lodash';
-import { Line, Container, Ticker } from './elements';
+import { Line, Container, Ticker, LineColors } from './elements';
 import { Track } from 'common/track';
+
+interface Colors {
+  background: string;
+  line: LineColors;
+}
 
 interface Props {
   lines: number;
   lineHeight: number;
   track: Track | undefined;
+  img: string | undefined;
+  colors: Colors | undefined;
 }
 
 const LATENCY_COMPENSATION = -400;
+
+const defaultColors = {
+  background: 'rgb(2,2,30)',
+  line: {
+    text: 'rgb(49, 49, 132)',
+    active: 'rgb(222, 222, 255)',
+    dim: 'rgba(61,61,147,0.5)',
+    shadow: 'rgb(80, 80, 210)',
+    glow: 'white'
+  }
+}
 
 export class Lyrics extends React.Component<Props> {
   private raf = 0;
@@ -150,11 +168,14 @@ export class Lyrics extends React.Component<Props> {
 
     let introLines = Math.floor(lines / 2);
 
+    const colors = this.props.colors || defaultColors;
+
     return (
-      <Container>
+      <Container background={colors.background}>
         <Ticker ref={this.tickerEl} position={this.getPosition(topLine)} {...{ lineHeight, lines }}>
           {timeline && timeline.map(([ts, t], i) => (
             <Line
+              colors={colors.line}
               key={i}
               ref={el => this.storeLinePosition(el, i)}
               dim={ i < line }

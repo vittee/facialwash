@@ -10,6 +10,9 @@ import * as mm from 'music-metadata';
 import { parse_lyric } from './lyrics';
 import { Track } from 'common/track';
 
+const splashy = require('splashy');
+
+
 const app = express();
 const server = http.createServer(app);
 const io = SocketIO(server);
@@ -47,6 +50,7 @@ liquidsoap.on('track', async track => {
       if (picture && picture.length) {
         const cover = picture[0];
         track.picture = cover;
+        track.colors = await splashy(cover.data);
       }
     }
   }
