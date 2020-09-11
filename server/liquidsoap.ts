@@ -19,8 +19,6 @@ const handler = new LiquidsoapHandler(router);
 router.post('/track', (req, res) => {
   const body = req.body;
 
-  console.log('Rcvd track', body);
-
   const meta = _.omit(body, 'frame_duration', 'sending_time_ms', 'position_ms')
   let { sending_time_ms, position_ms, frame_duration, filename } = body;
 
