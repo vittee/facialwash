@@ -69,7 +69,9 @@ export function parse_lyric(data: any): Lyrics {
     .reject((i: any) => _.isEmpty(i) || _.some(i, _.isEmpty))
     .map((i: any) => {
       let [k,v] = i;
-      if (k === 'offset') v=+v;
+      if (k === 'offset') {
+        v=+v;
+      }
       return [k,v];
     })
     .value() as unknown as any[][]
@@ -85,12 +87,13 @@ export function parse_lyric(data: any): Lyrics {
       return l;
     })
     .flatMap((l: any) => {
-      if (!l) return ({ time: null, text: ''});
+      if (!l) return ({ time: null, text: '' });
 
       const { text, times } = l;
       return times.map((time: any) => {
         return ({
-         time: time - offset, text
+         time: time - offset,
+         text
         })
       });
     })
@@ -188,7 +191,9 @@ export function parse_lyric(data: any): Lyrics {
       timeline.push({ time: last.time + 4000, text: '' });
     }
 
-    timeline.unshift({ time: 0, text: '' });
+    if (timeline.length) {
+      timeline.unshift({ time: 0, text: '' });
+    }
   }
 
   return {
