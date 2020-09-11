@@ -1,30 +1,28 @@
 import React, { useRef } from 'react';
-import { useOvermind } from 'overminds';
 import { Lyrics } from 'components/Lyrics';
-import styled from 'styled-components';
-import { getLuminance, darken, lighten, shade, tint, adjustHue, setLightness, linearGradient, saturate, rgb, parseToHsl, setSaturation } from 'polished';
+import { Title } from 'components/Title';
+import { Cover } from 'components/Cover/Cover';
+import { useOvermind } from 'overminds';
+
+import { getLuminance,
+  darken,
+  lighten,
+  shade,
+  tint,
+  adjustHue,
+  setLightness,
+  linearGradient,
+  rgb,
+  parseToHsl,
+  setSaturation,
+  hsl,
+  radialGradient
+} from 'polished';
+
 import _ from 'lodash';
 import * as blobUtil from 'blob-util';
 
-
-import { Title } from 'components/Title';
-import { Cover } from 'components/Cover/Cover';
-
-    setTimeout(() => {
-      const el = this.textEl.current!;
-      el.style.backgroundImage = bg;
-      el.innerText = this.text = s;
-      this.updateBounding();
-    }, 700);
-  }
-
-  updateBounding() {
-    const tm = this.el.current!.getContext('2d')!.measureText(this.text);
-    const tw = tm.width;
-    this.boxEl.current!.style.width = tw+'px';
-  }
-}
-
+const defaultColors = [rgb(182, 244, 146), rgb(51, 139, 147)];
 
 function findColor(base: string, predicate: (c: number) => boolean, fn: (deg: number, base: string) => string) {
   let deg = 0.1;
@@ -44,9 +42,16 @@ const App: React.FC = () => {
   const lines = 8;
   const lineHeight = 1.8;
 
-  const coverColors = _.sortBy(((track && track.colors) || []), getLuminance);
+  const trackColors = (track && track.colors) || (() => {
+    const main = hsl(_.random(360), _.random(0.5, 0.9, true), _.random(0.6, 0.8, true));
+    const deg = _.random(15, 20);
 
-  let img = undefined;
+    return _(6).times().map(i => adjustHue((i - 3) * deg, main))
+  })();
+
+  const coverColors = _.sortBy(trackColors, getLuminance);
+
+  let img: string | undefined = undefined;
   if (track && track.picture) {
     const blob = blobUtil.arrayBufferToBlob(track.picture.data, track.picture.format);
     img = blobUtil.createObjectURL(blob);
@@ -67,33 +72,43 @@ const App: React.FC = () => {
             c = setSaturation(0.5, c);
           }
 
-          if (hsl.lightness < 0.6) {
-            c = setLightness(0.6, c);
+          if (hsl.lightness < 0.5) {
+            c = setLightness(0.5, c);
           }
 
-          return findColor(adjustHue(-40, c), v => v < 0.4, lighten);
+          return findColor(adjustHue(-20, c), v => v < 0.3, lighten);
         })
+        .shuffle()
+        .flatMap(c => [c, adjustHue(_.random(15, 90), c)])
         .value();
 
-      gradient = linearGradient({
+      gradient = radialGradient({
         colorStops: titleColor,
-        toDirection: 'to right',
+        position: 'circle'
       }).backgroundImage;
     } else {
       gradient = linearGradient({
-        colorStops: [rgb(182, 244, 146), rgb(51, 139, 147)],
+        colorStops: defaultColors,
         toDirection: 'to right',
       }).backgroundImage;
     }
 
     titleEl.current.setText(
-      (track && `${track.meta['artist']} - ${track.meta['title']}`) || '',
+      (track && `${track.meta['artist']} - ${track.meta['title']}`) || 'No track',
       gradient as string
     );
   }
 
   if (coverEl.current) {
-    coverEl.current.setUrl(img);
+    let center = true;
+
+    if (track) {
+      if (track.lyrics) {
+        center = track.lyrics.timeline.length < 2;
+      }
+    }
+
+    coverEl.current.update(img, coverColors, center);
   }
 
   let colors = undefined;
@@ -102,11 +117,11 @@ const App: React.FC = () => {
     const [background, dim, text, shadow, active, glow] = coverColors;
 
     colors = {
-      background: findColor(background, v => v >= 0.0028, shade),
+      background: findColor(background, v => v >= 0.01, darken),
       line: {
         text: findColor(text, v => v >= 0.045, darken),
         active: findColor(active, v => v < 0.9, tint),
-        dim: findColor(dim, v => v >= 0.018, darken),
+        dim: findColor(dim, v => v >= 0.03, shade),
         shadow: findColor(shadow, v => v >= 0.11, shade),
         glow: findColor(glow, v => v < 0.97, lighten)
       }
@@ -121,7 +136,7 @@ const App: React.FC = () => {
         lineHeight,
         img,
         colors
-      }}/>
+      }} key="lyrics" />
 
       <Title ref={titleEl} key="title" />
 
