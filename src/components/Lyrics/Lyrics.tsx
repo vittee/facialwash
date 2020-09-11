@@ -33,7 +33,7 @@ export class Lyrics extends React.Component<Props> {
   private raf = 0;
   private lastTick = Date.now();
   private position = 0;
-  private lineElements: HTMLElement[] = [];
+  private lineElements: Line[] = [];
   private tickerEl = React.createRef<Ticker>();
 
   state: { line: number } = {
@@ -54,7 +54,6 @@ export class Lyrics extends React.Component<Props> {
 
   private resizeHandler = _.debounce(() => {
     if (this.tickerEl.current) {
-      console.log('Resize');
       const topLine = this.getTopLine(this.state.line);
       const y = this.getPosition(topLine);
       this.tickerEl.current.setPosition(y);
@@ -89,42 +88,61 @@ export class Lyrics extends React.Component<Props> {
   private updateLine() {
     const { track } = this.props;
 
-    if (track) {
-      const { lyrics } = track;
+    if (!track) {
+      return;
+    }
 
-      if (lyrics) {
-        const { timeline } = lyrics;
-        const { line } = this.state;
+    const { lyrics, meta } = track;
 
-        let foundLine = line;
-        let newLine = null;
+    if (!lyrics) {
+      return;
+    }
 
-        while (newLine !== foundLine) {
-          newLine = foundLine;
+    const { timeline } = lyrics;
+    const { line } = this.state;
 
-          let i = foundLine! + 1 || 0;
-          while (i < timeline.length) {
-            let t = timeline[i][0];
+    let foundLine = line;
+    let newLine = null;
 
-            if (t <= this.position + LATENCY_COMPENSATION) {
-              foundLine = i;
-              break;
-            }
+    while (newLine !== foundLine) {
+      newLine = foundLine;
 
-            i++;
-          }
+      let i = foundLine! + 1 || 0;
+      while (i < timeline.length) {
+        let t = timeline[i][0];
+
+        if (t <= this.position + LATENCY_COMPENSATION) {
+          foundLine = i;
+          break;
         }
 
-        if (foundLine !== line) {
-          this.setState({
-            line: foundLine
-          });
+        i++;
+      }
+    }
+
+    if (foundLine !== line) {
+      this.setState({
+        line: foundLine
+      });
+    }
+
+    const nextLine = _.findIndex(timeline, ([,t]) => t.trim().length > 0, foundLine + 1);
+
+    if (nextLine !== -1 && nextLine !== foundLine) {
+      const [ts, , far] = timeline[nextLine];
+      const bts = ts - (8 * (6e4/(meta.bpm || 90)));
+
+      if (true || far) {
+        const realpos = this.position + LATENCY_COMPENSATION;
+        const el = this.lineElements[nextLine];
+        if (el && realpos >= bts) {
+          el.setProgress(_.clamp((ts - realpos) / (ts - bts), 0, 1));
         }
       }
     }
   }
 
-  private storeLinePosition(el: HTMLDivElement | null, index: number) {
+  private storeLine(el: Line | null, index: number) {
     if (el && this.lineElements[index] !== el) {
       this.lineElements[index] = el;
     }
@@ -146,21 +164,13 @@ export class Lyrics extends React.Component<Props> {
 
   private getPosition(index: number) {
     const el = this.lineElements[index];
-    return el ? el.offsetTop : this.calculatePosition(index);
+    return (el && el.getTop()) || this.calculatePosition(index);
   }
 
   render() {
     const { track, lineHeight, lines } = this.props;
 
-    if (!track) {
-      return (
-        <>
-          No track
-        </>
-      )
-    }
-
-    const { lyrics } = track;
+    const lyrics = track && track.lyrics;
     const timeline = lyrics && lyrics.timeline;
 
     const { line } = this.state;
@@ -170,22 +180,28 @@ export class Lyrics extends React.Component<Props> {
 
     const colors = this.props.colors || defaultColors;
 
+    const mapLine = (info: any, i: number) => {
+      const [, t, far] = info;
+      return (
+        <Line
+          colors={colors.line}
+          key={i}
+          ref={el => this.storeLine(el, i)}
+          dim={ i < line }
+          active={ line === i }
+          zoom={i < introLines || topLine === 0 || i === timeline!.length - 1}
+          far={far}
+          {...{ lineHeight }}
+        >
+          {t}
+        </Line>
+      );
+    }
+
     return (
       <Container background={colors.background}>
         <Ticker ref={this.tickerEl} position={this.getPosition(topLine)} {...{ lineHeight, lines }}>
-          {timeline && timeline.map(([ts, t], i) => (
-            <Line
-              colors={colors.line}
-              key={i}
-              ref={el => this.storeLinePosition(el, i)}
-              dim={ i < line }
-              active={ line === i }
-              zoom={i < introLines || topLine === 0 || i === timeline.length - 1}
-              {...{ lineHeight }}
-            >
-              {t}
-            </Line>
-          ))}
+          {timeline && timeline.map(mapLine)}
         </Ticker>
       </Container>
     );

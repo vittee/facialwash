@@ -4,7 +4,7 @@ interface KeyValue {
   [index: string]: any;
 }
 
-export type LyricLine = [number, string];
+export type LyricLine = [number, string, boolean]; // timestamp, text, far
 
 export type Timeline = [LyricLine];
 
