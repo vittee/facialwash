@@ -30,6 +30,30 @@ app.use('/liq', liquidsoap.router);
 
 let currentTrack: Track | undefined;
 
+let tickTimer: any = undefined;
+
+function clearTickTimer() {
+  tickTimer && clearInterval(tickTimer);
+  tickTimer = undefined;
+}
+
+function startTickTimer() {
+  let lastTick = Date.now();
+
+  tickTimer = setInterval(() => {
+    const now = Date.now();
+    const delta = now - lastTick;
+
+    if (currentTrack) {
+      currentTrack.position_ms += delta;
+    } else {
+
+    }
+
+    lastTick = now;
+  }, 10);
+}
+
 io.on('connection', socket => {
   if (currentTrack) {
     socket.emit('track', currentTrack, Date.now());
@@ -39,8 +63,34 @@ io.on('connection', socket => {
 liquidsoap.on('track', async track => {
   currentTrack = track;
 
+  clearTickTimer();
+  const rcvdTime = Date.now();
+
   if (track.meta.lyrics) {
-    track.lyrics = parse_lyric(track.meta.lyrics);
+    const lyrics = parse_lyric(track.meta.lyrics);
+
+    if (lyrics) {
+      const bpm = track.meta.bpm || 90;
+      const beatInterval = 6e4/bpm;
+
+      let i = 0;
+      while (i < lyrics.timeline.length) {
+        const next = _.findIndex(lyrics.timeline, ([,t]) => t.trim().length > 0, i + 1);
+        if (next !== -1 && next !== i) {
+          const distance =  lyrics.timeline[next][0] - lyrics.timeline[i][0];
+          if (distance >= beatInterval * 12) {
+            lyrics.timeline[next][2] = true;
+          }
+
+          i = next;
+          continue;
+        }
+
+        i++;
+      }
+    }
+
+    track.lyrics = lyrics;
   }
 
   if (track.filename && fs.existsSync(track.filename)) {
@@ -55,21 +105,12 @@ liquidsoap.on('track', async track => {
     }
   }
 
-  io.emit('track', track, Date.now());
-});
-
-let lastTick = Date.now();
-
-setInterval(() => {
   const now = Date.now();
-  const delta = now - lastTick;
+  track.position_ms += now - rcvdTime;
+  io.emit('track', track, now);
 
-  if (currentTrack) {
-    currentTrack.position_ms += delta;
-  }
-
-  lastTick = now;
-}, 10);
+  startTickTimer();
+});
 
 const port = process.env.PORT || 4000;
 server.listen(port);
