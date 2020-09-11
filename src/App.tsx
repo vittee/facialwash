@@ -7,74 +7,8 @@ import _ from 'lodash';
 import * as blobUtil from 'blob-util';
 
 
-const CoverContainer = styled.div`
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  display: flex;
-  overflow: hidden;
-  z-index: 30;
-  border-radius: 100%;
-
-  animation: rotate 14s infinite linear;
-  backface-visibility: hidden;
-  perspective: 1000;
-
-  will-change: transform;
-
-  @keyframes rotate {
-    from {
-      transform: rotate(0deg) translateZ(0) rotateZ(360deg);
-    }
-
-    to {
-      transform: rotate(-360deg) translateZ(0) rotateZ(360deg);
-    }
-  }
-`;
-
-const CoverImage = styled.img`
-  margin: 0;
-  width: 7em;
-  height: 7em;
-  object-fit: cover;
-  opacity: 0;
-  transform: scale(2) rotate(-360deg);
-  user-select: none;
-
-  will-change: opacity, transform;
-  transition: opacity 0.8s ease-in, transform 1s ease-out;
-
-  &.visible {
-    opacity: 0.8;
-    transform: scale(1) rotate(0deg);
-  }
-`;
-
-class Cover extends React.Component {
-  private imageEl = React.createRef<HTMLImageElement>();
-
-  render() {
-    return (
-      <CoverContainer>
-        <CoverImage ref={this.imageEl} />
-      </CoverContainer>
-    )
-  }
-
-  setUrl(url: string | undefined) {
-    const el = this.imageEl.current;
-    if (el) {
-      el.classList.remove('visible');
-      setTimeout(() => {
-        el.src = url || '';
-        el.classList.add('visible');
-      }, 1e3);
-    }
-  }
-}
-
 import { Title } from 'components/Title';
+import { Cover } from 'components/Cover/Cover';
 
     setTimeout(() => {
       const el = this.textEl.current!;
@@ -191,7 +125,7 @@ const App: React.FC = () => {
 
       <Title ref={titleEl} key="title" />
 
-      <Cover ref={coverEl} key="default" />
+      <Cover ref={coverEl} key="cover" />
     </>
   );
 }
