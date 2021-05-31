@@ -51,7 +51,7 @@ export class Title extends React.Component {
 
     setTimeout(() => {
       const el = this.textEl.current!;
-      el.style.backgroundImage = bg;
+      el.style.backgroundImage = bg || "";
       el.innerText = this.text = s;
       this.updateBounding();
     }, 700);
