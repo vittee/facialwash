@@ -10,7 +10,9 @@ export class Cover extends React.Component {
     return (
       <CoverContainer ref={this.containerEl}>
         <CoverDisc ref={this.discEl}>
-          <CoverImage ref={this.imageEl} />
+          <div style={{ opacity: 0.77 }}>
+            <CoverImage ref={this.imageEl} />
+          </div>
           <CoverDecorator />
         </CoverDisc>
       </CoverContainer>

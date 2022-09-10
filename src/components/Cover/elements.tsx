@@ -226,12 +226,12 @@ export const CoverImage = styled.img`
   position:absolute;
   top: 50%;
   left: 50%;
-  width: 50%;
-  height: 50%;
-  margin-left: calc(-50% / 2);
-  margin-top: calc(-50% / 2);
+  width: 43%;
+  height: 43%;
+  margin-left: calc(-43% / 2);
+  margin-top: calc(-43% / 2);
   border-radius: 100%;
-  object-fit: cover;
+  object-fit: contain;
   object-position: center;
   opacity: 0;
   user-select: none;
@@ -252,7 +252,7 @@ export const CoverImage = styled.img`
   }
 
   &.visible {
-    opacity: 0.77;
+    opacity: 1;
   }
 `;
 

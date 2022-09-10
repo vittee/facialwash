@@ -1,8 +1,9 @@
-$font: 'Bai Jamjuree';
+$font: 'Athiti';
 
 @font-face {
   font-family: $font;
-  src: local($font), url(./BaiJamjuree-Regular.ttf) format('truetype');
+  // src: local($font), url(./BaiJamjuree-Regular.ttf) format('truetype');
+  src: local($font), url(./Athiti-Regular.ttf) format('truetype');
 }
 
 body {

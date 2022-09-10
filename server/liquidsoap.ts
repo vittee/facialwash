@@ -1,10 +1,10 @@
-import express, { Router } from 'express';
+import express, { Router, Request } from 'express';
 import { EventEmitter } from 'events';
 import _ from 'lodash';
-import { Track } from 'common/track';
+import { MedleyTrack, Track, TrackInfo } from 'common/track';
 
 declare interface LiquidsoapHandler {
-  on(event: 'track', listener:(track: Track) => void): this;
+  on(event: 'track', listener:(trackInfo: TrackInfo) => void): this;
 }
 
 class LiquidsoapHandler extends EventEmitter {
@@ -16,22 +16,18 @@ class LiquidsoapHandler extends EventEmitter {
 const router = express.Router();
 const handler = new LiquidsoapHandler(router);
 
-router.post('/track', (req, res) => {
-  const body = req.body;
+router.post('/track', (req: Request<{}, void, MedleyTrack>, res) => {
+  const { timing, track } = req.body;
+  const latency = (Date.now() - timing.sending_at);
 
-  const meta = _.omit(body, 'frame_duration', 'sending_time_ms', 'position_ms')
-  let { sending_time_ms, position_ms, frame_duration, filename } = body;
-
-  sending_time_ms = +sending_time_ms;
-  position_ms =  (+position_ms) + (Date.now() - sending_time_ms);
-  frame_duration = +frame_duration;
+  const { position } = timing;
 
   handler.emit('track', {
-    frame_duration,
-    sending_time_ms,
-    position_ms,
-    meta,
-    filename
+    position: {
+      current: position.current + latency,
+      duration: position.duration
+    },
+    track
   });
 
   res.end();

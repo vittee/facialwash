@@ -1,5 +1,5 @@
+import { LyricLine, Lyrics } from 'common/track';
 import _ from 'lodash';
-import { Lyrics, Timeline } from 'common/track';
 
 const attnExpr = /\[([^\]]*)\]/g;
 const infoExpr = /([^\d:]+):\s*(.*)\s*/;
@@ -201,7 +201,7 @@ export function parse_lyric(data: any): Lyrics {
     timeline: _(timeline)
       .reject(_.isNull)
       .sortBy('time')
-      .map(({ time, text }) => [time, text])
-      .value() as Timeline
+      .map<LyricLine>(({ time, text }) => [time, text])
+      .value()
   }
 }

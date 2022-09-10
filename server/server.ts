@@ -6,9 +6,9 @@ import SocketIO from 'socket.io';
 import path from 'path';
 import liquidsoap from './liquidsoap';
 import bodyParser from 'body-parser';
-import * as mm from 'music-metadata';
+import { Track, TrackInfo, Lyrics } from 'common/track';
 import { parse_lyric } from './lyrics';
-import { Track } from 'common/track';
+// import { splashy } from 'splashy';
 
 const splashy = require('splashy');
 
@@ -25,10 +25,10 @@ if (process.env.NODE_ENV !== 'development') {
   });
 }
 
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '500mb' }));
 app.use('/liq', liquidsoap.router);
 
-let currentTrack: Track | undefined;
+let currentTrackInfo: TrackInfo | undefined;
 
 let tickTimer: any = undefined;
 
@@ -44,8 +44,8 @@ function startTickTimer() {
     const now = Date.now();
     const delta = now - lastTick;
 
-    if (currentTrack) {
-      currentTrack.position_ms += delta;
+    if (currentTrackInfo) {
+      currentTrackInfo.position.current += delta;
     } else {
 
     }
@@ -55,22 +55,25 @@ function startTickTimer() {
 }
 
 io.on('connection', socket => {
-  if (currentTrack) {
-    socket.emit('track', currentTrack, Date.now());
+  if (currentTrackInfo) {
+    socket.emit('track', currentTrackInfo, Date.now());
   }
 });
 
-liquidsoap.on('track', async track => {
-  currentTrack = track;
+liquidsoap.on('track', async (info) => {
+  const rcvdTime = Date.now();
+  currentTrackInfo = info;
 
   clearTickTimer();
-  const rcvdTime = Date.now();
 
-  if (track.meta.lyrics) {
-    const lyrics = parse_lyric(track.meta.lyrics);
+  let lyrics: Lyrics | undefined;
+
+  if (info.track.lyrics) {
+    lyrics = parse_lyric(info.track.lyrics);
 
     if (lyrics) {
-      const bpm = track.meta.bpm || 90;
+      // const bpm = track.meta.bpm || 90;
+      const bpm = 90;
       const beatInterval = 6e4/bpm;
 
       let i = 0;
@@ -89,25 +92,31 @@ liquidsoap.on('track', async track => {
         i++;
       }
     }
-
-    track.lyrics = lyrics;
   }
 
-  if (track.filename && fs.existsSync(track.filename)) {
-    const meta = await mm.parseFile(track.filename);
-    if (meta) {
-      const { picture } = meta.common;
-      if (picture && picture.length) {
-        const cover = picture[0];
-        track.picture = cover;
-        track.colors = await splashy(cover.data);
-      }
-    }
+  let colors: string[] | undefined;
+
+  const cover = info.track.cover ? Buffer.from(info.track.cover, 'base64') : undefined;
+
+  if (cover) {
+    colors = await splashy(cover)
   }
+
+  console.log(colors);
 
   const now = Date.now();
-  track.position_ms += now - rcvdTime;
-  io.emit('track', track, now);
+  io.emit('track', {
+    position: {
+      ...info.position,
+      current: info.position.current + (now - rcvdTime)
+    },
+    track: {
+      ...info.track,
+      lyrics,
+      colors
+    }
+
+  }, now);
 
   startTickTimer();
 });

@@ -1,26 +1,30 @@
-import { IPicture } from "music-metadata";
-
-interface KeyValue {
-  [index: string]: any;
-}
-
-export type LyricLine = [number, string, boolean]; // timestamp, text, far
-
-export type Timeline = [LyricLine];
-
+export type LyricLine = [timestamp: number, text: string, far?: boolean];
 export interface Lyrics {
-  infos: KeyValue;
-  timeline: Timeline;
+  infos: Record<string, any>;
+  timeline: LyricLine[];
+}
+export interface Track {
+  tags: {
+    artist?: string;
+    title?: string;
+  },
+  lyrics?: Lyrics;
+  cover?: string;
+  colors?: string[];
 }
 
-export interface Track {
-  id: string,
-  frame_duration: number;
-  sending_time_ms: number;
-  position_ms: number;
-  meta: KeyValue;
-  lyrics?: Lyrics;
-  filename?: string;
-  picture?: IPicture;
-  colors?: string[];
+export interface TrackInfo {
+  position: {
+    current: number;
+    duration: number;
+  }
+  track: Track;
+}
+
+export type MedleyTrack = {
+  timing: {
+    sending_at: number;
+    position: TrackInfo['position']
+  },
+  track: Omit<Track, 'lyrics' | 'colors'> & { lyrics?: string };
 }

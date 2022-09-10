@@ -4,7 +4,7 @@ export const TitleContainer = styled.div`
   position: absolute;
   top: 0;
   left: 0;
-  z-index: 40;
+  z-index: 30;
 `;
 
 export const TitleBox = styled.div`

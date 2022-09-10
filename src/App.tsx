@@ -37,8 +37,8 @@ function findColor(base: string, predicate: (c: number) => boolean, fn: (deg: nu
 
 const App: React.FC = () => {
   const { state } = useOvermind();
-
-  const track = state.currentTrack;
+  const trackInfo = state.currentTrackInfo;
+  const track = trackInfo?.track;
   const lines = 8;
   const lineHeight = 1.8;
 
@@ -52,9 +52,10 @@ const App: React.FC = () => {
   const coverColors = _.sortBy(trackColors, getLuminance);
 
   let img: string | undefined = undefined;
-  if (track && track.picture) {
-    const blob = blobUtil.arrayBufferToBlob(track.picture.data, track.picture.format);
+  if (track && track.cover?.length) {
+    const blob = blobUtil.arrayBufferToBlob(Uint8Array.from(atob(track.cover), c => c.charCodeAt(0)), 'image/jpeg');
     img = blobUtil.createObjectURL(blob);
+    console.log(img);
   }
 
   const titleEl = useRef<Title>(null);
@@ -93,8 +94,12 @@ const App: React.FC = () => {
       }).backgroundImage;
     }
 
+    console.log(track?.tags?.artist);
+
+    const banner = [track?.tags?.artist, track?.tags?.title].join(' - ') || 'No track';
+
     titleEl.current.setText(
-      (track && `${track.meta['artist']} - ${track.meta['title']}`) || 'No track',
+      banner,
       gradient as string
     );
   }
@@ -104,7 +109,7 @@ const App: React.FC = () => {
 
     if (track) {
       if (track.lyrics) {
-        center = track.lyrics.timeline.length < 2;
+        center = track.lyrics?.timeline.length < 2;
       }
     }
 
@@ -130,8 +135,10 @@ const App: React.FC = () => {
 
   return (
     <>
+      <Cover ref={coverEl} key="cover" />
+
       <Lyrics {...{
-        track,
+        trackInfo,
         lines,
         lineHeight,
         img,
@@ -139,8 +146,6 @@ const App: React.FC = () => {
       }} key="lyrics" />
 
       <Title ref={titleEl} key="title" />
-
-      <Cover ref={coverEl} key="cover" />
     </>
   );
 }

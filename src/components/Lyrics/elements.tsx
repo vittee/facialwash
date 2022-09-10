@@ -50,6 +50,8 @@ export const InnerContainer = styled.div.attrs<BackgroundProp>(props => {
   transition: background-color 1s ease;
   will-change: background-color;
   transform: translateZ(0) rotateZ(360deg);
+  z-index: 0;
+  opacity: 0.99;
 `;
 
 const Decorator = styled.div`
@@ -101,7 +103,7 @@ export const Container: React.FC<BackgroundProp> = (props) => {
 }
 
 const TickerContainer = styled.div<LineLayoutProps>`
-  font-size: calc(100vh / (${props => props.lines} * ${props => props.lineHeight}));
+  font-size: calc(min(80vw, 100vh) / (${props => props.lines} * ${props => props.lineHeight}));
 `;
 
 const TickerScroller = styled.div.attrs<PositionProps>(props => {

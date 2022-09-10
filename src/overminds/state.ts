@@ -1,9 +1,9 @@
-import { Track } from "common/track";
+import { TrackInfo } from "common/track";
 
 type State = {
-  currentTrack: Track | undefined,
+  currentTrackInfo: TrackInfo | undefined,
 }
 
 export const state: State = {
-  currentTrack: undefined,
+  currentTrackInfo: undefined,
 }
