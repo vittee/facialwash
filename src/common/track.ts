@@ -3,11 +3,13 @@ export interface Lyrics {
   infos: Record<string, any>;
   timeline: LyricLine[];
 }
+
+export interface Tags {
+  artist?: string;
+  title?: string;
+}
 export interface Track {
-  tags: {
-    artist?: string;
-    title?: string;
-  },
+  tags: Tags;
   lyrics?: Lyrics;
   cover?: string;
   colors?: string[];

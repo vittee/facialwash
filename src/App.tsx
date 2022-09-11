@@ -21,6 +21,7 @@ import { getLuminance,
 
 import _ from 'lodash';
 import * as blobUtil from 'blob-util';
+import { PlayHead } from 'components/PlayHead';
 
 const defaultColors = [rgb(182, 244, 146), rgb(51, 139, 147)];
 
@@ -39,6 +40,7 @@ const App: React.FC = () => {
   const { state } = useOvermind();
   const trackInfo = state.currentTrackInfo;
   const track = trackInfo?.track;
+
   const lines = 8;
   const lineHeight = 1.8;
 
@@ -55,7 +57,6 @@ const App: React.FC = () => {
   if (track && track.cover?.length) {
     const blob = blobUtil.arrayBufferToBlob(Uint8Array.from(atob(track.cover), c => c.charCodeAt(0)), 'image/jpeg');
     img = blobUtil.createObjectURL(blob);
-    console.log(img);
   }
 
   const titleEl = useRef<Title>(null);
@@ -94,8 +95,6 @@ const App: React.FC = () => {
       }).backgroundImage;
     }
 
-    console.log(track?.tags?.artist);
-
     const banner = [track?.tags?.artist, track?.tags?.title].join(' - ') || 'No track';
 
     titleEl.current.setText(
@@ -109,7 +108,7 @@ const App: React.FC = () => {
 
     if (track) {
       if (track.lyrics) {
-        center = track.lyrics?.timeline.length < 2;
+        center = track.lyrics?.timeline?.length < 2;
       }
     }
 
@@ -146,6 +145,13 @@ const App: React.FC = () => {
       }} key="lyrics" />
 
       <Title ref={titleEl} key="title" />
+
+      <PlayHead
+        backgroundColor={colors?.background ?? 'rgb(2,2,30)'}
+        textColor={colors?.line?.text ?? 'rgb(49, 49, 132)'}
+        activeColor={colors?.line?.active ?? 'rgb(222, 222, 255)'}
+        {...{ trackInfo }}
+      />
     </>
   );
 }

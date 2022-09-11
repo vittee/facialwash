@@ -92,7 +92,7 @@ export class Lyrics extends React.Component<Props> {
       return;
     }
 
-    const { lyrics, tags } = trackInfo.track;
+    const { lyrics } = trackInfo.track;
 
     if (!lyrics) {
       return;
@@ -107,7 +107,7 @@ export class Lyrics extends React.Component<Props> {
       newLine = foundLine;
 
       let i = foundLine + 1 || 0;
-      while (i < lyrics.timeline.length) {
+      while (i < lyrics.timeline?.length) {
         let [t] = lyrics.timeline[i];
 
         if (t <= this.position + LATENCY_COMPENSATION) {
@@ -179,9 +179,7 @@ export class Lyrics extends React.Component<Props> {
     const colors = this.props.colors || defaultColors;
 
     const mapLine = (lyricLine: LyricLine, i: number) => {
-      const [, text] = lyricLine;
-
-      console.log(lyricLine);
+      const [, text, far = false] = lyricLine;
 
       return (
         <Line
@@ -190,8 +188,8 @@ export class Lyrics extends React.Component<Props> {
           ref={el => this.storeLine(el, i)}
           dim={ i < line }
           active={ line === i }
-          zoom={i < introLines || topLine === 0 || i === (lyrics?.timeline.length ?? 0) - 1}
-          far={false}
+          zoom={i < introLines || topLine === 0 || i === (lyrics?.timeline?.length ?? 0) - 1}
+          far={far}
           {...{ lineHeight }}
         >
           {text}
@@ -202,7 +200,7 @@ export class Lyrics extends React.Component<Props> {
     return (
       <Container background={colors.background}>
         <Ticker ref={this.tickerEl} position={this.getPosition(topLine)} {...{ lineHeight, lines }}>
-          {lyrics?.timeline.map(mapLine)}
+          {lyrics?.timeline?.map(mapLine)}
         </Ticker>
       </Container>
     );

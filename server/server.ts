@@ -6,12 +6,10 @@ import SocketIO from 'socket.io';
 import path from 'path';
 import liquidsoap from './liquidsoap';
 import bodyParser from 'body-parser';
-import { Track, TrackInfo, Lyrics } from 'common/track';
+import { TrackInfo, Lyrics } from 'common/track';
 import { parse_lyric } from './lyrics';
-// import { splashy } from 'splashy';
 
 const splashy = require('splashy');
-
 
 const app = express();
 const server = http.createServer(app);
@@ -54,6 +52,7 @@ function startTickTimer() {
   }, 10);
 }
 
+
 io.on('connection', socket => {
   if (currentTrackInfo) {
     socket.emit('track', currentTrackInfo, Date.now());
@@ -61,8 +60,7 @@ io.on('connection', socket => {
 });
 
 liquidsoap.on('track', async (info) => {
-  const rcvdTime = Date.now();
-  currentTrackInfo = info;
+  const receivedTime = Date.now();
 
   clearTickTimer();
 
@@ -102,24 +100,27 @@ liquidsoap.on('track', async (info) => {
     colors = await splashy(cover)
   }
 
-  console.log(colors);
-
   const now = Date.now();
-  io.emit('track', {
+
+  currentTrackInfo = {
     position: {
       ...info.position,
-      current: info.position.current + (now - rcvdTime)
+      current: info.position.current + (now - receivedTime)
     },
     track: {
       ...info.track,
       lyrics,
       colors
     }
+  }
 
-  }, now);
+  io.emit('track', currentTrackInfo, now);
 
   startTickTimer();
 });
+
+liquidsoap.on('next-loaded', tags => io.emit('next-loaded', tags));
+liquidsoap.on('next-started', () => io.emit('next-started'));
 
 const port = process.env.PORT || 4000;
 server.listen(port);
