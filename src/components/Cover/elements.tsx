@@ -239,7 +239,7 @@ export const CoverImage = styled.img`
 
   will-change: opacity, transform;
 
-  animation: spin 3.75s infinite linear;
+  animation: spin 4s infinite linear;
 
   @keyframes spin {
     from {

@@ -1,9 +1,10 @@
+import classNames from "classnames";
 import { Tags, TrackInfo } from "common/track";
-import _, { clamp } from "lodash";
+import { clamp } from "lodash";
 import { Connect, connect } from "overminds";
-import { lighten, transparentize } from "polished";
+import { setLightness, transparentize } from "polished";
 import React from "react";
-import { BackText, Box, Container, Next, Text } from "./elements";
+import { Box, Container, Next, ProgressText, Text } from "./elements";
 
 interface Props {
   trackInfo: TrackInfo | undefined;
@@ -86,7 +87,7 @@ export const PlayHead = connect(class PlayHead extends React.Component<Props & C
     const textStyle: React.CSSProperties = {
       clipPath: `inset(0 0 0 ${progress * 100}%)`,
       backgroundColor: transparentize(0.2, this.props.backgroundColor),
-      color: lighten(0.3, this.props.textColor)
+      color: setLightness(0.4, this.props.textColor)
     }
 
     if (this.loadingNext && !next) {
@@ -95,39 +96,41 @@ export const PlayHead = connect(class PlayHead extends React.Component<Props & C
       }, 4000)
     }
 
-    const nextClassName: string[] = [];
-    if (next) {
-      nextClassName.push('show');
-    }
+    let show = !!next;
+    let loading = false;
 
     if (this.loadingNext || nextLoading) {
       if (next) {
         this.loadingNext = next;
       }
 
-      nextClassName.push('loading');
+      loading = true;
     }
 
     const n = next ?? this.loadingNext;
+
+    const clockChars = text.split('').map(c => <span>{c}</span>)
 
     return (
       <>
         <Container ref={this.containerEl} className={ next && 'withNext'}>
           <Box>
-            <BackText
+            <ProgressText
               backgroundColor={this.props.backgroundColor}
-              textColor={this.props.activeColor}
+              textColor={this.props.textColor}
             >
-              {text}
-            </BackText>
-            <Text style={textStyle}>{text}</Text>
+              {clockChars}
+            </ProgressText>
+
+            <Text style={textStyle}>{clockChars}</Text>
           </Box>
         </Container>
+
         <Next
-          color={lighten(0.3, this.props.backgroundColor)}
-          className={nextClassName.join(' ')}
+          color={this.props.activeColor}
+          className={classNames({ show, loading })}
         >
-          {n && 'Next: '}{[n?.artist, n?.title].filter(e => !!e).join(' - ')}
+          <span>{n && 'Next: '}{[n?.artist, n?.title].filter(e => !!e).join(' - ')}</span>
         </Next>
       </>
     )

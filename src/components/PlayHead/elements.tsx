@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { invert, tint, transparentize } from 'polished';
+import { setLightness, transparentize } from 'polished';
 
 export const Container = styled.div`
   position: absolute;
@@ -11,7 +11,7 @@ export const Container = styled.div`
   transition-delay: 0.8s;
 
   &.withNext {
-    bottom: 1.20em;
+    bottom: 1.09em;
     transition: bottom 1.2s ease;
     transition-delay: 0s;
   }
@@ -19,7 +19,7 @@ export const Container = styled.div`
 
 export const Box = styled.div`
   position: relative;
-  padding: 0.12em 0.6em 0.12em 0.6em;
+  padding: 0.12em 0.6em;
   border-radius: 0.25em 0px 0px 0px;
   background-color: rgba(200, 200, 255, 0.3);
   transition: all 0.2s ease;
@@ -40,13 +40,20 @@ const BaseText = styled.div`
   top: 0;
   bottom: 0;
 
-  padding-left: 33%;
+  padding-left: calc(50% - (0.6em * 5 / 2));
 
   border-radius: 0.25em 0px 0px 0px;
 
   user-select: none;
 
-  background-size: 50px 50px;
+  & > span {
+    display: inline-block;
+    width: 0.6em;
+    text-align: center;
+    color: inherit;
+  }
+
+  background-size: 2.5vh 2.5vh;
   animation: move 2s linear infinite;
 
   @keyframes move {
@@ -54,7 +61,7 @@ const BaseText = styled.div`
       background-position: 0 0;
     }
     100% {
-      background-position: 50px 50px;
+      background-position: 2.5vh 2.5vh;
     }
   }
 
@@ -65,7 +72,7 @@ const BaseText = styled.div`
     color 2.2s ease-in-out;
 `;
 
-export const BackText = styled(BaseText)<{ backgroundColor: string, textColor: string }>`
+export const ProgressText = styled(BaseText)<{ backgroundColor: string, textColor: string }>`
   background-image: linear-gradient(
     -45deg,
     ${props => transparentize(0.2, props.backgroundColor)} 25%,
@@ -77,7 +84,7 @@ export const BackText = styled(BaseText)<{ backgroundColor: string, textColor: s
     transparent
   );
 
-  color: ${props => tint(0.2, props.textColor)};
+  color: ${props => setLightness(0.65, props.textColor)};
 `;
 
 export const Text = styled(BaseText)`
@@ -86,19 +93,25 @@ export const Text = styled(BaseText)`
 
 export const Next = styled.div<{ color: string }>`
   position: absolute;
+  display: flex;
+
   bottom: 0;
   right: 0;
-  z-index: 30;
+  z-index: 20;
 
-  font-size: 0.8em;
+  justify-content: center;
+  align-items: center;
+  font-size: 0.6em;
 
-  padding: 0em 0.6em 0.5em 0.6em;
+  user-select: none;
+
+  padding: 0.4em;
   background-color: rgba(200, 200, 255, 0.3);
   white-space: nowrap;
   height: 1.0em;
-  min-width: 10vw;
+  min-width: calc(10.7em);
 
-  color: white;
+  color: ${props => props.color};
 
   opacity: 0;
 
@@ -109,17 +122,17 @@ export const Next = styled.div<{ color: string }>`
     transition: opacity 0.6s ease, color 4s ease;
   }
 
-  &.loading {
+  &.loading > * {
     animation: blink 0.5s linear alternate infinite;
   }
 
   @keyframes blink {
     from {
-      color: ${props => props.color};
+      opacity: 1;
     }
 
     to {
-      color: ${props => invert(props.color)};
+      opacity: 0.15;
     }
   }
 `;

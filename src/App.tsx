@@ -19,8 +19,7 @@ import { getLuminance,
   radialGradient
 } from 'polished';
 
-import _ from 'lodash';
-import * as blobUtil from 'blob-util';
+import { chain, random, sortBy } from 'lodash';
 import { PlayHead } from 'components/PlayHead';
 
 const defaultColors = [rgb(182, 244, 146), rgb(51, 139, 147)];
@@ -45,19 +44,15 @@ const App: React.FC = () => {
   const lineHeight = 1.8;
 
   const trackColors = (track && track.colors) || (() => {
-    const main = hsl(_.random(360), _.random(0.5, 0.9, true), _.random(0.6, 0.8, true));
-    const deg = _.random(15, 20);
+    const main = hsl(random(360), random(0.5, 0.9, true), random(0.6, 0.8, true));
+    const deg = random(15, 20);
 
-    return _(6).times().map(i => adjustHue((i - 3) * deg, main))
+    return chain(6).times().map(i => adjustHue((i - 3) * deg, main)).value()
   })();
 
-  const coverColors = _.sortBy(trackColors, getLuminance);
+  const coverColors = sortBy(trackColors, getLuminance);
 
-  let img: string | undefined = undefined;
-  if (track && track.cover?.length) {
-    const blob = blobUtil.arrayBufferToBlob(Uint8Array.from(atob(track.cover), c => c.charCodeAt(0)), 'image/jpeg');
-    img = blobUtil.createObjectURL(blob);
-  }
+  const img = (track && track.cover?.length) ? `data:application/octet-binary;base64,${track.cover}` : undefined;
 
   const titleEl = useRef<Title>(null);
   const coverEl = useRef<Cover>(null);
@@ -66,7 +61,7 @@ const App: React.FC = () => {
     let gradient;
 
     if (coverColors.length) {
-      const titleColor = _(coverColors)
+      const titleColor = chain(coverColors)
         .map(c => {
           const hsl = parseToHsl(c);
 
@@ -81,7 +76,7 @@ const App: React.FC = () => {
           return findColor(adjustHue(-20, c), v => v < 0.3, lighten);
         })
         .shuffle()
-        .flatMap(c => [c, adjustHue(_.random(15, 90), c)])
+        .flatMap(c => [c, adjustHue(random(15, 90), c)])
         .value();
 
       gradient = radialGradient({

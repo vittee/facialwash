@@ -1,54 +1,74 @@
-import { LyricLine, Lyrics } from 'common/track';
-import _ from 'lodash';
+import _, { clamp, reject, some } from "lodash";
+
+export type LyricLine = {
+  time: number;
+  text: string;
+  far?: boolean;
+}
+
+export type Timeline = LyricLine[];
+
+type Line = {
+  infos: [string, string][];
+  times: number[];
+  text: string;
+}
+
+export type Lyrics = {
+  infos: Record<string, string[]>;
+  timeline: Timeline;
+}
+
 
 const attnExpr = /\[([^\]]*)\]/g;
 const infoExpr = /([^\d:]+):\s*(.*)\s*/;
 const timeExpr = /(\d+):(\d+\.\d+)/;
 
-type LineInfo = {
-  infos: any[][],
-  times: number[],
-  text: string
-} | null;
+type MaybeLine = Line | undefined;
 
-type LineResult = LineInfo | null;
+const isLyricLine = (line: any): line is LyricLine => line && 'time' in line;
 
-function parse_line(line: string): LineResult {
+function parseLine(line: string): MaybeLine {
   const match = line.match(/(\[.*\])\s*(.*)/);
-
   if (!match) {
-    return null;
+    return;
   }
 
-  const [, tag, text] = match;
+  const [, annotation, text] = match;
 
   const tags = [];
   let m: RegExpExecArray | null;
-  while (m = attnExpr.exec(tag)) {
+  while (m = attnExpr.exec(annotation)) {
     tags.push(m[1]);
   }
 
-  let infos: any = [];
-  let times: any = [];
+  const infos: [string, string][] = [];
+  const times: number[] = [];
 
-  tags.forEach(t => {
-    const info_match = t.match(infoExpr);
+  for (const tag of tags) {
+    // Info tag
+    {
+      const match = tag.match(infoExpr);
 
-    if (info_match) {
-      const [, key, value] = info_match;
-      infos.push([key, value]);
-      return;
+      if (match) {
+        const [, key, value] = match;
+        infos.push([key, value]);
+        continue;
+      }
     }
 
-    const time_match = t.match(timeExpr);
-    if (time_match) {
-      const [, mm, ss] = time_match;
-
-      const mins = parseInt(mm);
-      const secs = parseFloat(ss);
-      times.push(1e3*(60*mins+secs));
+    // Time tag
+    {
+      const match = tag.match(timeExpr);
+      if (match) {
+        const [, mm, ss] = match;
+        times.push((+mm*60 + +ss) * 1000)
+        continue;
+      }
     }
-  });
+
+    // Ignore other
+  }
 
   return {
     infos,
@@ -57,68 +77,30 @@ function parse_line(line: string): LineResult {
   }
 }
 
-export function parse_lyric(data: any): Lyrics {
-  const lines: LineResult[] = data.toString()
-    .replace(/\r\n/g, "\n")
-    .split(/\n/)
-    .map(parse_line);
+export function parseLyrics(s: string): Lyrics {
+  const lines = s.replace(/\r\n/g, "\n").split(/\n/).map(parseLine);
 
-  const infos = _.defaults(_.fromPairs(_(lines)
-    .map(l => l && l.infos)
-    .flatten()
-    .reject((i: any) => _.isEmpty(i) || _.some(i, _.isEmpty))
-    .map((i: any) => {
-      let [k,v] = i;
-      if (k === 'offset') {
-        v=+v;
-      }
-      return [k,v];
-    })
-    .value() as unknown as any[][]
-  ), { offset: 0 });
-
-  const { offset } = infos;
-
-  const timeline = _(lines)
-    .map((l: any) => {
-      if (l) {
-        l = _.omit(l, 'infos');
-      }
-      return l;
-    })
-    .flatMap((l: any) => {
-      if (!l) return ({ time: null, text: '' });
-
-      const { text, times } = l;
-      return times.map((time: any) => {
-        return ({
-         time: time - offset,
-         text
-        })
-      });
-    })
+  const infos = _(lines)
+    .flatMap(line => line?.infos ?? [])
+    .groupBy(([key]) => key)
+    .mapValues(list => list.map(([, val]) => val))
     .value();
 
-  const hasTime = (l: any) => !_.isNull(l.time);
+  const offset = _.max((infos.offset || []).map(Number)) || 0;
 
-  if (_.some(timeline, _.isObject)) {
-    // Trim nulls from head and tail
-    const firstIndex = _.findIndex(timeline, hasTime);
-
-    if (firstIndex > 0) {
-      timeline.splice(0, firstIndex);
+  const timeline = _.flatMap<MaybeLine, LyricLine | undefined>(lines, line => {
+    if (line === undefined) {
+      return;
     }
 
-    const lastIndex = _.findLastIndex(timeline, hasTime);
+    const { text, times } = line;
+    return times.map(time => ({ time: time - offset, text }))
+  });
 
-    if (lastIndex < timeline.length) {
-      timeline.splice(lastIndex + 1, timeline.length - lastIndex - 1);
-    }
-
+  if (some(timeline, isLyricLine)) {
     let index = 0;
-    let length = timeline.length;
-    while (index < length) {
-      const nextIndex = _.findIndex(timeline, hasTime, index + 1);
+    while (index < timeline.length) {
+      const nextIndex = _.findIndex(timeline, isLyricLine, index + 1);
 
       if (nextIndex < 0) {
         break;
@@ -127,81 +109,59 @@ export function parse_lyric(data: any): Lyrics {
       const current = timeline[index];
       const next = timeline[nextIndex];
 
-      if (current === null) {
+      if (current === undefined) {
         index = nextIndex;
         continue;
       }
 
-      if (next === null) {
+      if (next === undefined) {
         break;
       }
 
-      const skipCount = nextIndex - index - 1;
+      const gaps = nextIndex - index - 1;
+      if (gaps > 0) {
+        const idlingTime = Math.min(current.time + 6000, next.time);
+        const duration = (next.time - idlingTime) / gaps;
+        // interpolate time between gaps
+        const newTimes = _.map(Array(gaps), (t, i) => current.time + (i * duration));
 
-      if (skipCount > 0) {
-        const idleingTime = _.min([current.time + 6000, next.time]);
+        let fillers = _(newTimes)
+          .map(time => ({ time: clamp(time, idlingTime, next.time), text: '' }))
+          .sortBy('time')
+          .value()
 
-        const duration = (next.time - idleingTime) / skipCount;
-        const newTimes = _.map(Array(skipCount), (t,i) => current.time+(i*duration));
-
-        let filler = _(newTimes)
-          .map(t => _.clamp(t, idleingTime, next.time))
-          .sort()
-          .map(time => ({ time, text: ''}))
-          .value();
-
-        // Reduce duplicated empty time
-        const dups = _(filler)
+        const dups = _(fillers)
           .filter(f => f.text === '')
-          .countBy('time')
-          .omitBy(c => c <= 1)
-          .toPairs()
-          .map(p => {
-            const [t, c] = p as any;
-            return [+t,c-1];
-          })
-          .sortBy(p => -p[0])
+          .groupBy('time')
+          .omitBy(group => group.length <= 1)
+          .map<[number, number]>(group => [ group![0].time, group!.length - 1 ])
+          .sortBy(([time]) => -time)
           .value();
 
-        dups.forEach(d => {
-          let [t,c] = d;
-          filler = _.reject(filler, ({ time }) => {
-            return (time === t) ? (c-- > 0) : false;
-          });
-        });
+        for (const [t, c] of dups) {
+          fillers = reject(fillers, ({ time }) => (time === t) && (c > 1));
+        }
 
-        Array.prototype.splice.apply(timeline, [index + 1, skipCount].concat(filler as any) as any)
+        timeline.splice(index + 1, gaps, ...fillers);
       }
 
       index = nextIndex;
     }
-
-    // post processing
-    if (timeline.length > 1) {
-      const { time, text } = _.last(timeline);
-
-      if (time === 59940000 || /^\*{3}.*\*{3}$/.test(text)) {
-        timeline.pop();
-      }
-    }
-
-    const last = _.last(timeline);
-
-    if (last) {
-      timeline.push({ time: last.time + 4000, text: '' });
-    }
-
-    if (timeline.length) {
-      timeline.unshift({ time: 0, text: '' });
-    }
   }
+
+  const finalTimeline = _(timeline)
+    .filter(isLyricLine)
+    .sortBy('time')
+    .dropRightWhile(line => line.time >= 59940000 || /^\*{3}.*\*{3}$/.test(line.text))
+    .value()
 
   return {
     infos,
-    timeline: _(timeline)
-      .reject(_.isNull)
-      .sortBy('time')
-      .map<LyricLine>(({ time, text }) => [time, text])
-      .value()
-  }
+    timeline: finalTimeline
+  };
+}
+
+export const lyricsToText = (lyrics: Lyrics, removeEmptyLine: boolean = true) => {
+  const texts = lyrics.timeline.map(({ text }) => text);
+  return removeEmptyLine ? texts.filter(text => !!text) : texts;
 }

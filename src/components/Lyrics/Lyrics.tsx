@@ -1,7 +1,8 @@
 import React from 'react';
 import _ from 'lodash';
 import { Line, Container, Ticker, LineColors } from './elements';
-import { LyricLine, Track, TrackInfo } from 'common/track';
+import { TrackInfo } from 'common/track';
+import { LyricLine } from '../../../server/lyrics';
 
 interface Colors {
   background: string;
@@ -16,8 +17,10 @@ interface Props {
   colors: Colors | undefined;
 }
 
-const LATENCY_COMPENSATION = 300;
+// TODO: Make this a prop
+const LATENCY_COMPENSATION = 0;
 
+// TODO: Move outside, make it sharable
 const defaultColors = {
   background: 'rgb(2,2,30)',
   line: {
@@ -63,7 +66,6 @@ export class Lyrics extends React.Component<Props> {
   componentDidMount() {
     this.animate();
     window.addEventListener('resize', this.resizeHandler);
-    console.log('Did mount');
   }
 
   componentWillUnmount() {
@@ -106,11 +108,11 @@ export class Lyrics extends React.Component<Props> {
     while (newLine !== foundLine) {
       newLine = foundLine;
 
-      let i = foundLine + 1 || 0;
+      let i = (foundLine + 1) || 0;
       while (i < lyrics.timeline?.length) {
-        let [t] = lyrics.timeline[i];
+        let { time } = lyrics.timeline[i];
 
-        if (t <= this.position + LATENCY_COMPENSATION) {
+        if (time !== undefined && time <= this.position + LATENCY_COMPENSATION) {
           foundLine = i;
           break;
         }
@@ -125,10 +127,10 @@ export class Lyrics extends React.Component<Props> {
       });
     }
 
-    const nextLine = _.findIndex(lyrics.timeline, ([, text]) => text.trim().length > 0, foundLine + 1);
+    const nextLine = _.findIndex(lyrics.timeline, ({ text }) => text.trim().length > 0, foundLine + 1);
 
     if (nextLine !== -1 && nextLine !== foundLine) {
-      const [time] = lyrics.timeline[nextLine];
+      const { time } = lyrics.timeline[nextLine];
       const bts = time - (8 * (6e4/90)); // TODO: 90 BPM
 
       if (true) {
@@ -148,22 +150,27 @@ export class Lyrics extends React.Component<Props> {
   }
 
   private getTopLine(line: number) {
-    const { lines } = this.props;
-    let introLines = Math.floor(lines / 2);
-    let topLine = (line || 0) - (introLines - 1);
-    if (topLine < 0) topLine = 0;
-
-    return topLine;
+    return Math.max(0, line - (this.props.lines / 2) + 1);
   }
 
   private calculatePosition(line: number) {
     const heights = Math.floor(window.innerHeight / this.props.lines);
-    return (line >= 0 ? line : 0) * heights;
+    return line * heights;
   }
 
   private getPosition(index: number) {
-    const el = this.lineElements[index];
-    return (el && el.getTop()) || this.calculatePosition(index);
+    const heights = Math.floor(window.innerHeight / this.props.lines);
+
+    const stickyLine = this.props.lines / 2 - 1;
+
+    if (index < stickyLine) {
+      return -heights * (stickyLine - index);
+    }
+
+    const topLine = this.getTopLine(index);
+
+    const el = this.lineElements[topLine];
+    return (el && el.getTop()) || this.calculatePosition(topLine);
   }
 
   render() {
@@ -172,23 +179,20 @@ export class Lyrics extends React.Component<Props> {
     const { lyrics } = trackInfo?.track ?? {};
 
     const { line } = this.state;
-    const topLine = this.getTopLine(line);
-
-    let introLines = Math.floor(lines / 2);
 
     const colors = this.props.colors || defaultColors;
 
     const mapLine = (lyricLine: LyricLine, i: number) => {
-      const [, text, far = false] = lyricLine;
+      const { text, far = false } = lyricLine;
 
       return (
         <Line
           colors={colors.line}
           key={i}
           ref={el => this.storeLine(el, i)}
-          dim={ i < line }
-          active={ line === i }
-          zoom={i < introLines || topLine === 0 || i === (lyrics?.timeline?.length ?? 0) - 1}
+          dim={i < line}
+          active={line === i}
+          zoom={line === i}
           far={far}
           {...{ lineHeight }}
         >
@@ -199,7 +203,11 @@ export class Lyrics extends React.Component<Props> {
 
     return (
       <Container background={colors.background}>
-        <Ticker ref={this.tickerEl} position={this.getPosition(topLine)} {...{ lineHeight, lines }}>
+        <Ticker
+          ref={this.tickerEl}
+          position={this.getPosition(line)}
+          {...{ lineHeight, lines }}
+        >
           {lyrics?.timeline?.map(mapLine)}
         </Ticker>
       </Container>

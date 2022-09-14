@@ -1,8 +1,4 @@
-export type LyricLine = [timestamp: number, text: string, far?: boolean];
-export interface Lyrics {
-  infos: Record<string, any>;
-  timeline: LyricLine[];
-}
+import { Lyrics } from "../../server/lyrics";
 
 export interface Tags {
   artist?: string;

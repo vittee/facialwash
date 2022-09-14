@@ -1,13 +1,10 @@
 import _ from 'lodash';
-import fs from 'fs'
 import http from 'http';
-import express from 'express';
+import express, { Request } from 'express';
 import SocketIO from 'socket.io';
 import path from 'path';
-import liquidsoap from './liquidsoap';
-import bodyParser from 'body-parser';
-import { TrackInfo, Lyrics } from 'common/track';
-import { parse_lyric } from './lyrics';
+import { MedleyTrack, Tags, TrackInfo } from 'common/track';
+import { Lyrics, parseLyrics } from './lyrics';
 
 const splashy = require('splashy');
 
@@ -23,12 +20,11 @@ if (process.env.NODE_ENV !== 'development') {
   });
 }
 
-app.use(bodyParser.json({ limit: '500mb' }));
-app.use('/liq', liquidsoap.router);
+app.use(express.json({ limit: '10mb' }));
 
 let currentTrackInfo: TrackInfo | undefined;
 
-let tickTimer: any = undefined;
+let tickTimer: NodeJS.Timeout | undefined;
 
 function clearTickTimer() {
   tickTimer && clearInterval(tickTimer);
@@ -59,15 +55,15 @@ io.on('connection', socket => {
   }
 });
 
-liquidsoap.on('track', async (info) => {
-  const receivedTime = Date.now();
+app.post('/track', async (req: Request<{}, void, MedleyTrack>, res) => {
+  const { timing, track } = req.body;
 
   clearTickTimer();
 
   let lyrics: Lyrics | undefined;
 
-  if (info.track.lyrics) {
-    lyrics = parse_lyric(info.track.lyrics);
+  if (track.lyrics) {
+    lyrics = parseLyrics(track.lyrics);
 
     if (lyrics) {
       // const bpm = track.meta.bpm || 90;
@@ -76,11 +72,11 @@ liquidsoap.on('track', async (info) => {
 
       let i = 0;
       while (i < lyrics.timeline.length) {
-        const next = _.findIndex(lyrics.timeline, ([,t]) => t.trim().length > 0, i + 1);
+        const next = _.findIndex(lyrics.timeline, ({ text }) => text.trim().length > 0, i + 1);
         if (next !== -1 && next !== i) {
-          const distance =  lyrics.timeline[next][0] - lyrics.timeline[i][0];
+          const distance =  lyrics.timeline[next].time - lyrics.timeline[i].time;
           if (distance >= beatInterval * 12) {
-            lyrics.timeline[next][2] = true;
+            lyrics.timeline[next].far = true;
           }
 
           i = next;
@@ -94,33 +90,40 @@ liquidsoap.on('track', async (info) => {
 
   let colors: string[] | undefined;
 
-  const cover = info.track.cover ? Buffer.from(info.track.cover, 'base64') : undefined;
+  const cover = track.cover ? Buffer.from(track.cover, 'base64') : undefined;
 
   if (cover) {
     colors = await splashy(cover)
   }
 
-  const now = Date.now();
-
   currentTrackInfo = {
     position: {
-      ...info.position,
-      current: info.position.current + (now - receivedTime)
+      current: timing.position.current + (Date.now() - timing.sending_at),
+      duration: timing.position.duration
     },
     track: {
-      ...info.track,
+      ...track,
       lyrics,
       colors
     }
   }
 
-  io.emit('track', currentTrackInfo, now);
+  io.emit('track', currentTrackInfo, Date.now());
 
   startTickTimer();
+
+  res.end();
+})
+
+app.post('/next-loaded', (req: Request<{}, void, Tags>, res) => {
+  io.emit('next-loaded', req.body);
+  res.end();
 });
 
-liquidsoap.on('next-loaded', tags => io.emit('next-loaded', tags));
-liquidsoap.on('next-started', () => io.emit('next-started'));
+app.post('/next-started', (req, res) => {
+  io.emit('next-started')
+  res.end();
+});
 
 const port = process.env.PORT || 4000;
 server.listen(port);

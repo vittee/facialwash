@@ -1,5 +1,5 @@
 import React from 'react';
-import styled from "styled-components";
+import styled, { CSSProperties } from "styled-components";
 import classNames from 'classnames';
 import { linearGradient, rgba } from 'polished';
 
@@ -122,14 +122,10 @@ const TickerScroller = styled.div.attrs<PositionProps>(props => {
   white-space: nowrap;
   will-change: transform;
 
-  transition: transform 0.1s ease-out;
+  transition: transform 0.75s ease-out;
 
   backface-visibility: hidden;
   perspective: 1000;
-
-  &.smooth {
-    transition: transform 1s ease;
-  }
 `;
 
 export class Ticker extends React.Component<Props> {
@@ -138,7 +134,7 @@ export class Ticker extends React.Component<Props> {
   setPosition(position: number) {
     const el = this.ref.current;
     if (el) {
-      el.style.transform = `translate(0px, ${-position}px)`;
+      el.style.transform = `translate3d(0px, ${-position}px)`;
     }
   }
 
@@ -159,7 +155,7 @@ const LineText = styled.div.attrs<LineProps>(props => {
 
   const colors = props.colors;
 
-  const style: any = {};
+  const style: CSSProperties = {};
 
   if (active) {
     style.color = colors.active;
@@ -176,7 +172,7 @@ const LineText = styled.div.attrs<LineProps>(props => {
 
 })<LineProps>`
   transition: color 0.3s ease, font-size 1s ease, transform 1s ease, text-shadow 1.5s ease;
-  transform: scale(0.8766) perspective(1px) translateZ(0) rotateZ(360deg);
+  transform: scale(1) translateZ(0) rotateZ(360deg);
 
   line-height: ${props => props.lineHeight}em;
   min-height: ${props => props.lineHeight}em;
@@ -187,11 +183,10 @@ const LineText = styled.div.attrs<LineProps>(props => {
   backface-visibility: hidden;
   perspective: 1000;
 
-  font-size: 1.1234em;
+  font-size: 1em;
 
   &.zoom {
-    // font-size: 1.1234em;
-    transform: scale(1) perspective(1px) translateZ(0) rotateZ(360deg);
+    transform: scale(1.12) translateZ(0) rotateZ(360deg);
   }
 
   &.dim {
@@ -204,7 +199,7 @@ interface IndicatorProps {
 }
 
 const LineFarIndicator = styled.div.attrs<IndicatorProps>(props => {
-  const style: any = {
+  const style: CSSProperties = {
     borderColor: `transparent transparent transparent ${props.color}`
   };
 

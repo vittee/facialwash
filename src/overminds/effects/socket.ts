@@ -1,5 +1,5 @@
 import io from 'socket.io-client';
-import { Tags, Track, TrackInfo } from 'common/track';
+import { Tags, TrackInfo } from 'common/track';
 
 let socket: SocketIOClient.Socket;
 
@@ -34,6 +34,7 @@ class SocketEffect {
     return socket!;
   }
 
+  // TODO: Remove any
   private handleOnTrack = (info: TrackInfo, timestamp: any) => {
     const latency = Date.now() - timestamp;
     info.position.current += latency;
