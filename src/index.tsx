@@ -1,4 +1,4 @@
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import App from './App';
 import './index.scss';
 import { createOvermind } from 'overmind';
@@ -7,8 +7,9 @@ import { Provider } from 'overmind-react';
 
 const overmind = createOvermind(config);
 
-ReactDOM.render((
+const root = createRoot(document.getElementById('root')!);
+root.render(
   <Provider value={overmind}>
     <App />
   </Provider>
-), document.getElementById('root'));
+);

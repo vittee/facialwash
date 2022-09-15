@@ -109,7 +109,7 @@ export const PlayHead = connect(class PlayHead extends React.Component<Props & C
 
     const n = next ?? this.loadingNext;
 
-    const clockChars = text.split('').map(c => <span>{c}</span>)
+    const clockChars = text.split('').map((c, i) => <span key={i}>{c}</span>)
 
     return (
       <>
