@@ -15,13 +15,11 @@ interface Props {
   trackInfo: TrackInfo | undefined;
   img: string | undefined;
   colors: Colors | undefined;
+  bpm?: number;
+  latencyCompensation?: number;
 }
 
-// TODO: Make this a prop
-const LATENCY_COMPENSATION = 0;
-
-// TODO: Move outside, make it sharable
-const defaultColors = {
+export const defaultColors = {
   background: 'rgb(2,2,30)',
   line: {
     text: 'rgb(49, 49, 132)',
@@ -88,7 +86,7 @@ export class Lyrics extends React.Component<Props, { line: number }> {
   }
 
   private updateLine() {
-    const { trackInfo } = this.props;
+    const { trackInfo, bpm = 90, latencyCompensation = 0 } = this.props;
 
     if (!trackInfo) {
       return;
@@ -112,7 +110,7 @@ export class Lyrics extends React.Component<Props, { line: number }> {
       while (i < lyrics.timeline?.length) {
         let { time } = lyrics.timeline[i];
 
-        if (time !== undefined && time <= this.position + LATENCY_COMPENSATION) {
+        if (time !== undefined && time <= this.position + latencyCompensation) {
           foundLine = i;
           break;
         }
@@ -131,13 +129,13 @@ export class Lyrics extends React.Component<Props, { line: number }> {
 
     if (nextLine !== -1 && nextLine !== foundLine) {
       const { time } = lyrics.timeline[nextLine];
-      const bts = time - (8 * (6e4/90)); // TODO: 90 BPM
+      const beatTimestamp = time - (8 * (6e4 / bpm));
 
       if (true) {
-        const realpos = this.position + LATENCY_COMPENSATION;
+        const realPosition = this.position + latencyCompensation;
         const el = this.lineElements[nextLine];
-        if (el && realpos >= bts) {
-          el.setProgress(_.clamp((time - realpos) / (time - bts), 0, 1));
+        if (el && realPosition >= beatTimestamp) {
+          el.setProgress(_.clamp((time - realPosition) / (time - beatTimestamp), 0, 1));
         }
       }
     }

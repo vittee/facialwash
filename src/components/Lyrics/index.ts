@@ -1,1 +1,1 @@
-export { Lyrics } from './Lyrics';
+export { Lyrics, defaultColors } from './Lyrics';

@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { Lyrics } from 'components/Lyrics';
+import { Lyrics, defaultColors as defaultLyricsColors } from 'components/Lyrics';
 import { Title } from 'components/Title';
 import { Cover } from 'components/Cover/Cover';
 import { useOvermind } from 'overminds';
@@ -142,9 +142,9 @@ const App: React.FC = () => {
       <Title ref={titleEl} />
 
       <PlayHead
-        backgroundColor={colors?.background ?? 'rgb(2,2,30)'}
-        textColor={colors?.line?.text ?? 'rgb(49, 49, 132)'}
-        activeColor={colors?.line?.active ?? 'rgb(222, 222, 255)'}
+        backgroundColor={colors?.background ?? defaultLyricsColors.background}
+        textColor={colors?.line?.text ?? defaultLyricsColors.line.text}
+        activeColor={colors?.line?.active ?? defaultLyricsColors.line.active}
 
         position={trackInfo?.position?.current ?? 0}
         duration={trackInfo?.position?.duration ?? 0}
