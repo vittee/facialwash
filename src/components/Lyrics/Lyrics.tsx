@@ -128,10 +128,10 @@ export class Lyrics extends React.Component<Props, { line: number }> {
     const nextLine = _.findIndex(lyrics.timeline, ({ text }) => text.trim().length > 0, foundLine + 1);
 
     if (nextLine !== -1 && nextLine !== foundLine) {
-      const { time } = lyrics.timeline[nextLine];
+      const { time, far } = lyrics.timeline[nextLine];
       const beatTimestamp = time - (8 * (6e4 / bpm));
 
-      if (true) {
+      if (far) {
         const realPosition = this.position + latencyCompensation;
         const el = this.lineElements[nextLine];
         if (el && realPosition >= beatTimestamp) {
@@ -172,7 +172,7 @@ export class Lyrics extends React.Component<Props, { line: number }> {
   }
 
   render() {
-    const { trackInfo, lineHeight, lines } = this.props;
+    const { trackInfo, lineHeight, lines, bpm = 90 } = this.props;
 
     const { lyrics } = trackInfo?.track ?? {};
 
@@ -181,7 +181,7 @@ export class Lyrics extends React.Component<Props, { line: number }> {
     const colors = this.props.colors || defaultColors;
 
     const mapLine = (lyricLine: LyricLine, i: number) => {
-      const { text, far = i === 0 && lyricLine.time > 1.5 } = lyricLine;
+      const { text, far = false } = lyricLine;
 
       return (
         <Line

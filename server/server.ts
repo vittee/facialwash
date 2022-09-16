@@ -66,9 +66,9 @@ app.post('/track', async (req: Request<{}, void, MedleyTrack>, res) => {
     lyrics = parseLyrics(track.lyrics);
 
     if (lyrics) {
-      // const bpm = track.meta.bpm || 90;
-      const bpm = 90;
-      const beatInterval = 6e4/bpm;
+      const { bpm = 90 }  = timing;
+      const beatInterval = 6e4 / bpm;
+      const measureInterval = 4 * beatInterval;
 
       let i = 0;
       while (i < lyrics.timeline.length) {
@@ -84,6 +84,10 @@ app.post('/track', async (req: Request<{}, void, MedleyTrack>, res) => {
         }
 
         i++;
+      }
+
+      if (lyrics.timeline[0]?.time >= 1.5 * measureInterval) {
+        lyrics.timeline[0].far = true;
       }
     }
   }

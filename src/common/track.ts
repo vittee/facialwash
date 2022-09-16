@@ -22,7 +22,8 @@ export interface TrackInfo {
 export type MedleyTrack = {
   timing: {
     sending_at: number;
-    position: TrackInfo['position']
+    position: TrackInfo['position'];
+    bpm?: number;
   },
   track: Omit<Track, 'lyrics' | 'colors'> & { lyrics?: string };
 }

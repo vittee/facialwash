@@ -23,7 +23,7 @@
     "start": "run-p dev:*",
     "build": "tsc --build && vite build",
     "dev:react": "vite",
-    "dev:server": "tsx --tsconfig tsconfig.server.json server/server.ts"
+    "dev:server": "tsx watch --tsconfig tsconfig.server.json server/server.ts"
   },
   "eslintConfig": {
     "extends": "react-app"
