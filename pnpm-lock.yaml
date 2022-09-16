@@ -16,7 +16,7 @@ specifiers:
   npm-run-all: ^4.1.5
   overmind: 27.0.0
   overmind-react: 28.0.0
-  polished: ^3.7.2
+  polished: 4.2.2
   react: 18.2.0
   react-dom: 18.2.0
   react-is: ^18.2.0
@@ -38,7 +38,7 @@ dependencies:
   lodash: 4.17.21
   overmind: 27.0.0
   overmind-react: 28.0.0
-  polished: 3.7.2
+  polished: 4.2.2
   react: 18.2.0
   react-dom: 18.2.0_react@18.2.0
   react-is: 18.2.0
@@ -2124,8 +2124,8 @@ packages:
     engines: {node: '>=4.0.0'}
     dev: false
 
-  /polished/3.7.2:
-    resolution: {integrity: sha512-pQKtpZGmsZrW8UUpQMAnR7s3ppHeMQVNyMDKtUyKwuvDmklzcEyM5Kllb3JyE/sE/x7arDmyd35i+4vp99H6sQ==}
+  /polished/4.2.2:
+    resolution: {integrity: sha512-Sz2Lkdxz6F2Pgnpi9U5Ng/WdWAUZxmHrNPoVlm3aAemxoy2Qy7LGjQg4uf8qKelDAUW94F4np3iH2YPf2qefcQ==}
     engines: {node: '>=10'}
     dependencies:
       '@babel/runtime': 7.19.0

@@ -251,8 +251,6 @@ export class Line extends React.Component<PropsWithChildren<LineProps>> {
   setProgress(progress: number) {
     if (this.farEl.current) {
       this.farEl.current.style.opacity = `${progress}`;
-      const d = 0.8 + (0.3 * progress);
-      this.farEl.current.style.animationDuration = `${d}s`;
     }
   }
 
