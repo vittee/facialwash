@@ -37,7 +37,7 @@ function findColor(base: string, predicate: (c: number) => boolean, fn: (deg: nu
 
 const App: React.FC = () => {
   const { state } = useOvermind();
-  const trackInfo = state.currentTrackInfo;
+  const { next, nextLoading, currentTrackInfo: trackInfo } = state;
   const track = trackInfo?.track;
 
   const lines = 8;
@@ -129,7 +129,7 @@ const App: React.FC = () => {
 
   return (
     <>
-      <Cover ref={coverEl} key="cover" />
+      <Cover ref={coverEl} />
 
       <Lyrics {...{
         trackInfo,
@@ -137,14 +137,21 @@ const App: React.FC = () => {
         lineHeight,
         img,
         colors
-      }} key="lyrics" />
+      }} />
 
-      <Title ref={titleEl} key="title" />
+      <Title ref={titleEl} />
 
       <PlayHead
         backgroundColor={colors?.background ?? 'rgb(2,2,30)'}
         textColor={colors?.line?.text ?? 'rgb(49, 49, 132)'}
         activeColor={colors?.line?.active ?? 'rgb(222, 222, 255)'}
+
+        position={trackInfo?.position?.current ?? 0}
+        duration={trackInfo?.position?.duration ?? 0}
+
+        next={[next?.artist, next?.title].filter(e => !!e).join(' - ')}
+        nextLoading={nextLoading}
+
         {...{ trackInfo }}
       />
     </>

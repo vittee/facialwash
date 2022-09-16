@@ -1,12 +1,17 @@
+import React, { useEffect, useRef, useState } from "react";
 import classNames from "classnames";
 import { Tags, TrackInfo } from "common/track";
 import { clamp } from "lodash";
-import { Connect, connect } from "overminds";
 import { setLightness, transparentize } from "polished";
-import React from "react";
 import { Box, Container, Next, ProgressText, Text } from "./elements";
 
 interface Props {
+  position: number;
+  duration: number;
+
+  next?: string;
+  nextLoading?: boolean;
+
   trackInfo: TrackInfo | undefined;
   backgroundColor: string;
   textColor: string;
@@ -15,21 +20,24 @@ interface Props {
 
 interface State {
   position: number;
-  duration: number;
 }
 
-export const PlayHead = connect(class PlayHead extends React.Component<Props & Connect, State> {
+function format(ms: number) {
+  const seconds = ms / 1000;
+  const mm = Math.trunc(seconds / 60);
+  const ss = Math.trunc(seconds % 60);
+  return [mm, ss].map(e => e.toString().padStart(2, '0')).join(':')
+}
+
+export const PlayHead = class PlayHead extends React.Component<Props, State> {
   private raf = 0;
   private lastTick = Date.now();
 
-  private loadingNext?: Tags;
+  private loadingNext?: string;
 
   state = {
-    position: 0,
-    duration: 0
+    position: 0
   }
-
-  private containerEl = React.createRef<HTMLDivElement>();
 
   private animate() {
     this.raf = requestAnimationFrame(() => {
@@ -41,7 +49,7 @@ export const PlayHead = connect(class PlayHead extends React.Component<Props & C
         this.animate();
 
         return {
-          position: clamp(prev.position + delta, 0, this.state.duration)
+          position: clamp(prev.position + delta, 0, this.props.duration)
         }
       })
     });
@@ -56,33 +64,20 @@ export const PlayHead = connect(class PlayHead extends React.Component<Props & C
   }
 
   componentDidUpdate(prev: Props) {
-    const { trackInfo } = this.props;
+    const { trackInfo, position } = this.props;
 
     if (prev.trackInfo !== trackInfo) {
-      const position = trackInfo?.position;
-
       this.lastTick = Date.now();
-      this.setState({
-        position: position?.current ?? 0,
-        duration: position?.duration ?? 0
-      })
+      this.setState({ position });
     }
   }
 
-  private format(ms: number) {
-    const seconds = ms / 1000;
-    const mm = Math.trunc(seconds / 60);
-    const ss = Math.trunc(seconds % 60);
-    return [mm, ss].map(e => e.toString().padStart(2, '0')).join(':')
-  }
-
   render() {
-    let { next, nextLoading } = this.props.overmind.state;
-
-    const { position, duration } = this.state;
+    const { duration, next, nextLoading } = this.props;
+    const { position } = this.state;
     const progress = position / duration;
 
-    const text = this.format(position);
+    const text = format(position);
 
     const textStyle: React.CSSProperties = {
       clipPath: `inset(0 0 0 ${progress * 100}%)`,
@@ -107,13 +102,13 @@ export const PlayHead = connect(class PlayHead extends React.Component<Props & C
       loading = true;
     }
 
-    const n = next ?? this.loadingNext;
+    const n = next || this.loadingNext;
 
     const clockChars = text.split('').map((c, i) => <span key={i}>{c}</span>)
 
     return (
       <>
-        <Container ref={this.containerEl} className={ next && 'withNext'}>
+        <Container className={classNames({ withNext: show })}>
           <Box>
             <ProgressText
               backgroundColor={this.props.backgroundColor}
@@ -130,9 +125,9 @@ export const PlayHead = connect(class PlayHead extends React.Component<Props & C
           color={this.props.activeColor}
           className={classNames({ show, loading })}
         >
-          <span>{n && 'Next: '}{[n?.artist, n?.title].filter(e => !!e).join(' - ')}</span>
+          <span>{n && 'Next: '}{n}</span>
         </Next>
       </>
     )
   }
-});
+};

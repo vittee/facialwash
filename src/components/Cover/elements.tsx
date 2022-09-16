@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 import styled from "styled-components";
 import _ from 'lodash';
 import { rgba, transparentize } from "polished";
@@ -204,7 +204,7 @@ const CoverDiscElement = styled.div.attrs<ColorsProp>(props => {
   }
 `;
 
-export class CoverDisc extends React.Component<{}, ColorsProp> {
+export class CoverDisc extends React.Component<PropsWithChildren<{}>, ColorsProp> {
   state = {
     colors: []
   }

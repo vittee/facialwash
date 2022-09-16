@@ -32,14 +32,14 @@ const defaultColors = {
   }
 }
 
-export class Lyrics extends React.Component<Props> {
+export class Lyrics extends React.Component<Props, { line: number }> {
   private raf = 0;
   private lastTick = Date.now();
   private position = 0;
   private lineElements: Line[] = [];
   private tickerEl = React.createRef<Ticker>();
 
-  state: { line: number } = {
+  state = {
     line: 0
   }
 

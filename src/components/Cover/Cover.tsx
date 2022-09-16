@@ -73,9 +73,9 @@ export class Cover extends React.Component {
       }
 
       const isCentered = cont.classList.contains('center');
-      const fn =  (isCentered && !center) ? centerThenReveal : revealThenCenter;
+      const animate =  (isCentered && !center) ? centerThenReveal : revealThenCenter;
 
-      fn();
+      animate();
     }
   }
 }

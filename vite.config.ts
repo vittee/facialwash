@@ -3,7 +3,6 @@ import react from "@vitejs/plugin-react";
 import tsconfig_paths from 'vite-tsconfig-paths';
 
 export default defineConfig({
-  // root: './src',
   plugins: [
     react(),
     tsconfig_paths()

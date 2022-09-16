@@ -3,14 +3,13 @@ import { state } from './state';
 import * as actions from './actions';
 import * as effects from './effects';
 import { onInitialize } from './init';
-import { createHook, createConnect, IConnect } from 'overmind-react';
+import { createHook, createConnect, IConnect, createStateHook } from 'overmind-react';
 
 export const config = {
   onInitialize,
   state,
   actions,
-  effects,
-  devtools: true
+  effects
 }
 
 type ConfigType = typeof config;
@@ -26,3 +25,5 @@ export interface Connect extends IConnect<ConfigType> {}
 export const useOvermind = createHook<ConfigType>();
 
 export const connect = createConnect<ConfigType>();
+
+export const useAppState = createStateHook<ConfigType>();

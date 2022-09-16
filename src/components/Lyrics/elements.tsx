@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 import styled, { CSSProperties } from "styled-components";
 import classNames from 'classnames';
 import { linearGradient, rgba } from 'polished';
@@ -89,7 +89,7 @@ const BottomDecorator = styled(Decorator).attrs<BackgroundProp>(props => {
   bottom: 0;
 `;
 
-export const Container: React.FC<BackgroundProp> = (props) => {
+export const Container: React.FC<PropsWithChildren<BackgroundProp>> = (props) => {
   const { background } = props;
   const p = { background };
 
@@ -128,7 +128,7 @@ const TickerScroller = styled.div.attrs<PositionProps>(props => {
   perspective: 1000;
 `;
 
-export class Ticker extends React.Component<Props> {
+export class Ticker extends React.Component<PropsWithChildren<Props>> {
   private ref = React.createRef<HTMLDivElement>();
 
   setPosition(position: number) {
@@ -240,7 +240,7 @@ const LineWrapper = styled.div`
   justify-content: center;
 `;
 
-export class Line extends React.Component<LineProps> {
+export class Line extends React.Component<PropsWithChildren<LineProps>> {
   private el = React.createRef<HTMLDivElement>();
   private farEl = React.createRef<HTMLDivElement>();
 

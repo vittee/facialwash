@@ -14,8 +14,8 @@ specifiers:
   express: ^4.17.1
   lodash: ^4.17.14
   npm-run-all: ^4.1.5
-  overmind: ^19.0.1
-  overmind-react: ^20.0.1
+  overmind: 27.0.0
+  overmind-react: 28.0.0
   polished: ^3.7.2
   react: 18.2.0
   react-dom: 18.2.0
@@ -36,8 +36,8 @@ dependencies:
   classnames: 2.3.2
   express: 4.18.1
   lodash: 4.17.21
-  overmind: 19.2.0
-  overmind-react: 20.2.0
+  overmind: 27.0.0
+  overmind-react: 28.0.0
   polished: 3.7.2
   react: 18.2.0
   react-dom: 18.2.0_react@18.2.0
@@ -1946,6 +1946,10 @@ packages:
       url: 0.11.0
     dev: false
 
+  /non-blocking-json/1.1.1:
+    resolution: {integrity: sha512-iweGQWA3+GZkjJEXhvtRh1fjo8DpnotpL8+13NSwaI28X6HaqlYTxAI/ZXawCmva2GS3NaOl5NdNudg3RyQreQ==}
+    dev: false
+
   /normalize-package-data/2.5.0:
     resolution: {integrity: sha512-/5CMN3T0R4XTj4DcGaexo+roZSdSFW/0AOOTROrjxzCG1wrWXEsGbRKevjlIL+ZDE4sZlJr5ED4YW0yqmkK+eA==}
     dependencies:
@@ -2005,18 +2009,20 @@ packages:
       ee-first: 1.1.1
     dev: false
 
-  /overmind-react/20.2.0:
-    resolution: {integrity: sha512-xdIJw0e/9n10MQMzpXqfw6DcY3aYRBQjR/krxtpPFnOu7Fe3UM/dGUtZMvawgnHQT7GQrurFpJeqJL3FUfqoAA==}
+  /overmind-react/28.0.0:
+    resolution: {integrity: sha512-6KNjaB3AUx8ta5xvVvrxb9rcOX2eGkmrSngIlNhBVoZtiD10zspo7sYMJsHewCnbwthXg255BOJUJdg3jl9EuA==}
     dependencies:
-      overmind: 19.2.0
+      overmind: 27.0.0
     dev: false
 
-  /overmind/19.2.0:
-    resolution: {integrity: sha512-wR8atU5RoE8iXvZS3MKrAKbn52fncKUktSQu17eIf1ihbrslAiO2InipwGdr4m8HGdvOgTiBPi5s/ygn6bMsyw==}
+  /overmind/27.0.0:
+    resolution: {integrity: sha512-Olh3Ckb+KJcYIBun+ZP0PU5bEPkdAIXt/uNtBWx6C9nfpX+dndTb1VSaEpA69diNGE3V38GnNnynd7K41ruiqA==}
     dependencies:
       betsy: 1.0.2
       is-plain-obj: 1.1.0
-      proxy-state-tree: 4.4.3
+      non-blocking-json: 1.1.1
+      proxy-state-tree: 6.2.0
+      tslib: 1.14.1
     dev: false
 
   /pako/1.0.11:
@@ -2151,8 +2157,8 @@ packages:
       ipaddr.js: 1.9.1
     dev: false
 
-  /proxy-state-tree/4.4.3:
-    resolution: {integrity: sha512-ucXlGp6fVCLhiwA+Gx8ePvA47S+JFTgJbj7gHBPr2vyaDX1RXrAjmy1OwdChsL3/3ogLc2xkJGn9p+p2DaIC7Q==}
+  /proxy-state-tree/6.2.0:
+    resolution: {integrity: sha512-6xbFPeUArtx6eR3vmDJPEUhHLJebpKvceMe5DVClCF7ZHge8tVghbmPqJP4KZLmXMY3orHdFNA5blbFQkB5a+Q==}
     dependencies:
       is-plain-obj: 1.1.0
     dev: false
