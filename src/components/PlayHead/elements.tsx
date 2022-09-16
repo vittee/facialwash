@@ -109,8 +109,6 @@ export const Next = styled.div<{ color: string }>`
   background-color: rgba(200, 200, 255, 0.3);
   white-space: nowrap;
   height: 1.0em;
-  // TODO: This display incorrectly on non-fullscreen window
-  min-width: calc();
 
   color: ${props => props.color};
 

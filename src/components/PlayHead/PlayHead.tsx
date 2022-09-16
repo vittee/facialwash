@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { createRef } from "react";
 import classNames from "classnames";
-import { Tags, TrackInfo } from "common/track";
+import { TrackInfo } from "common/track";
 import { clamp } from "lodash";
 import { setLightness, transparentize } from "polished";
 import { Box, Container, Next, ProgressText, Text } from "./elements";
@@ -34,6 +34,8 @@ export const PlayHead = class PlayHead extends React.Component<Props, State> {
   private lastTick = Date.now();
 
   private loadingNext?: string;
+
+  private containerRef = createRef<HTMLDivElement>();
 
   state = {
     position: 0
@@ -104,11 +106,13 @@ export const PlayHead = class PlayHead extends React.Component<Props, State> {
 
     const n = next || this.loadingNext;
 
-    const clockChars = text.split('').map((c, i) => <span key={i}>{c}</span>)
+    const clockChars = text.split('').map((c, i) => <span key={i}>{c}</span>);
+
+
 
     return (
       <>
-        <Container className={classNames({ withNext: show })}>
+        <Container ref={this.containerRef} className={classNames({ withNext: show })}>
           <Box>
             <ProgressText
               backgroundColor={this.props.backgroundColor}
@@ -122,6 +126,7 @@ export const PlayHead = class PlayHead extends React.Component<Props, State> {
         </Container>
 
         <Next
+          style={{ minWidth: `calc(${this.containerRef.current?.clientWidth}px - 0.4em * 2)` }}
           color={this.props.activeColor}
           className={classNames({ show, loading })}
         >
