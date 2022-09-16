@@ -10,6 +10,8 @@ export const Container = styled.div`
   transition: bottom 4s ease;
   transition-delay: 0.8s;
 
+  will-change: bottom, transition, transition-delay;
+
   &.withNext {
     bottom: 1.09em;
     transition: bottom 1.2s ease;
@@ -26,6 +28,8 @@ export const Box = styled.div`
   white-space: nowrap;
   height: 1.0em;
   width: 10vw;
+
+  transition: width 2s ease;
 `;
 
 const BaseText = styled.div`
@@ -52,6 +56,8 @@ const BaseText = styled.div`
     text-align: center;
     color: inherit;
   }
+
+  will-change: background-position;
 
   background-size: 2.5vh 2.5vh;
   animation: move 2s linear infinite;
@@ -85,6 +91,8 @@ export const ProgressText = styled(BaseText)<{ backgroundColor: string, textColo
   );
 
   color: ${props => setLightness(0.65, props.textColor)};
+
+  will-change: background-position, background-image, color;
 `;
 
 export const Text = styled(BaseText)`
@@ -114,11 +122,11 @@ export const Next = styled.div<{ color: string }>`
 
   opacity: 0;
 
-  transition: opacity 4s ease, color 4s ease;
+  transition: opacity 4s ease, color 4s ease, width 2s ease;
 
   &.show {
     opacity: 1;
-    transition: opacity 0.6s ease, color 4s ease;
+    transition: opacity 0.6s ease, color 4s ease, width 2s ease;
   }
 
   &.loading > * {

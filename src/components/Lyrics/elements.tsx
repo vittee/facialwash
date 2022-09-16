@@ -215,7 +215,7 @@ const LineFarIndicator = styled.div.attrs<IndicatorProps>(props => {
   animation: wobble 0.66s infinite alternate linear;
 
   opacity: 0;
-  will-change: height, opacity, transform;
+  will-change: height, opacity, transform, animation-duration;
 
   transition: opacity 0.8s linear, border-color 0.5s linear;
 
@@ -250,7 +250,9 @@ export class Line extends React.Component<PropsWithChildren<LineProps>> {
 
   setProgress(progress: number) {
     if (this.farEl.current) {
-      this.farEl.current.style.opacity = ''+progress;
+      this.farEl.current.style.opacity = `${progress}`;
+      const d = 0.8 + (0.3 * progress);
+      this.farEl.current.style.animationDuration = `${d}s`;
     }
   }
 

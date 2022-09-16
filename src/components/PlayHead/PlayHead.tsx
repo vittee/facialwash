@@ -45,6 +45,7 @@ export const PlayHead: React.FC<PropsWithChildren<Omit<Props, 'next' | 'nextLoad
 
 class InternalPlayHead extends React.Component<PropsWithChildren<Props>, State> {
   private raf = 0;
+  private timer?: NodeJS.Timeout;
   private lastTick = Date.now();
 
   private loadingNext?: string;
@@ -102,9 +103,13 @@ class InternalPlayHead extends React.Component<PropsWithChildren<Props>, State> 
     }
 
     if (this.loadingNext && !next) {
-      setTimeout(() => {
+      if (this.timer) {
+        clearTimeout(this.timer);
+      }
+
+      this.timer = setTimeout(() => {
         this.loadingNext = undefined;
-      }, 4000)
+      }, 4000);
     }
 
     let show = !!next;
@@ -121,8 +126,6 @@ class InternalPlayHead extends React.Component<PropsWithChildren<Props>, State> 
     const n = next || this.loadingNext;
 
     const clockChars = text.split('').map((c, i) => <span key={i}>{c}</span>);
-
-
 
     return (
       <>
