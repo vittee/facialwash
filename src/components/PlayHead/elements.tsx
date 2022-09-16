@@ -10,7 +10,7 @@ export const Container = styled.div`
   transition: bottom 4s ease;
   transition-delay: 0.8s;
 
-  will-change: bottom, transition, transition-delay;
+  will-change: bottom;
 
   &.withNext {
     bottom: 1.09em;
@@ -28,11 +28,10 @@ export const Box = styled.div`
   white-space: nowrap;
   height: 1.0em;
   width: 10vw;
-
-  transition: width 2s ease;
 `;
 
-const BaseText = styled.div`
+
+export const ProgressText = styled.div<{ backgroundColor: string, textColor: string }>`
   position: absolute;
   display: flex;
   background-size: 300vw;
@@ -57,7 +56,7 @@ const BaseText = styled.div`
     color: inherit;
   }
 
-  will-change: background-position;
+  will-change: background-position, background-image, color;
 
   background-size: 2.5vh 2.5vh;
   animation: move 2s linear infinite;
@@ -73,31 +72,35 @@ const BaseText = styled.div`
 
   transform: translateZ(0) rotateZ(360deg);
   transition:
-    clip-path 0.5s ease,
+    clip-path 0.2s ease,
     background-color 2.2s ease-in-out,
     color 2.2s ease-in-out;
-`;
 
-export const ProgressText = styled(BaseText)<{ backgroundColor: string, textColor: string }>`
   background-image: linear-gradient(
     -45deg,
-    ${props => transparentize(0.2, props.backgroundColor)} 25%,
+    ${props => transparentize(0.3, props.backgroundColor)} 25%,
     transparent 25%,
     transparent 50%,
-     ${props => transparentize(0.2, props.backgroundColor)} 50%,
-     ${props => transparentize(0.2, props.backgroundColor)} 75%,
+     ${props => transparentize(0.3, props.backgroundColor)} 50%,
+     ${props => transparentize(0.3, props.backgroundColor)} 75%,
     transparent 75%,
     transparent
   );
 
   color: ${props => setLightness(0.65, props.textColor)};
-
-  will-change: background-position, background-image, color;
 `;
 
-export const Text = styled(BaseText)`
+export const Mask = styled.div`
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
 
-`;
+  background-color: rgb(0 0 0 / 0.5);
+
+  transition: left 0.5s ease;
+`
 
 export const Next = styled.div<{ color: string }>`
   position: absolute;

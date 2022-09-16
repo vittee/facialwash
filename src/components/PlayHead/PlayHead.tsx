@@ -3,7 +3,7 @@ import classNames from "classnames";
 import { TrackInfo } from "common/track";
 import { clamp } from "lodash";
 import { setLightness, transparentize } from "polished";
-import { Box, Container, Next, ProgressText, Text } from "./elements";
+import { Box, Container, Mask, Next, ProgressText } from "./elements";
 import { useOvermind } from "overminds";
 
 interface Props {
@@ -96,11 +96,11 @@ class InternalPlayHead extends React.Component<PropsWithChildren<Props>, State> 
 
     const text = format(position);
 
-    const textStyle: React.CSSProperties = {
-      clipPath: `inset(0 0 0 ${progress * 100}%)`,
-      backgroundColor: transparentize(0.2, this.props.backgroundColor),
-      color: setLightness(0.4, this.props.textColor)
-    }
+    // const textStyle: React.CSSProperties = {
+    //   clipPath: `inset(0 0 0 ${progress * 100}%)`,
+    //   backgroundColor: transparentize(0.2, this.props.backgroundColor),
+    //   color: setLightness(0.4, this.props.textColor)
+    // }
 
     if (this.loadingNext && !next) {
       if (this.timer) {
@@ -138,7 +138,7 @@ class InternalPlayHead extends React.Component<PropsWithChildren<Props>, State> 
               {clockChars}
             </ProgressText>
 
-            <Text style={textStyle}>{clockChars}</Text>
+            <Mask style={{ left: `${progress * 100}%` }} />
           </Box>
         </Container>
 
