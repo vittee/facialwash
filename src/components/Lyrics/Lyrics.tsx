@@ -40,7 +40,7 @@ export class Lyrics extends React.Component<Props, { line: number }> {
   private tickerEl = React.createRef<Ticker>();
 
   state = {
-    line: 0
+    line: -1
   }
 
   private animate() {
@@ -82,7 +82,7 @@ export class Lyrics extends React.Component<Props, { line: number }> {
       this.position = trackInfo?.position.current || 0;
       this.lastTick = Date.now();
       this.lineElements = Array(timeline.length).fill(0);
-      this.setState({ line: 0 });
+      this.setState({ line: -1 });
       this.updateLine();
     }
   }
@@ -183,7 +183,7 @@ export class Lyrics extends React.Component<Props, { line: number }> {
     const colors = this.props.colors || defaultColors;
 
     const mapLine = (lyricLine: LyricLine, i: number) => {
-      const { text, far = false } = lyricLine;
+      const { text, far = i === 0 && lyricLine.time > 1.5 } = lyricLine;
 
       return (
         <Line
