@@ -1,9 +1,10 @@
-import React, { createRef } from "react";
+import React, { createRef, PropsWithChildren } from "react";
 import classNames from "classnames";
 import { TrackInfo } from "common/track";
 import { clamp } from "lodash";
 import { setLightness, transparentize } from "polished";
 import { Box, Container, Next, ProgressText, Text } from "./elements";
+import { useOvermind } from "overminds";
 
 interface Props {
   position: number;
@@ -29,7 +30,20 @@ function format(ms: number) {
   return [mm, ss].map(e => e.toString().padStart(2, '0')).join(':')
 }
 
-export const PlayHead = class PlayHead extends React.Component<Props, State> {
+export const PlayHead: React.FC<PropsWithChildren<Omit<Props, 'next' | 'nextLoading'>>> = (props) => {
+  const { state } = useOvermind();
+  const { next, nextLoading } = state;
+
+  return (
+    <InternalPlayHead
+      {...props }
+      next={[next?.artist, next?.title].filter(e => !!e).join(' - ')}
+      nextLoading={nextLoading}
+    />
+  )
+}
+
+class InternalPlayHead extends React.Component<PropsWithChildren<Props>, State> {
   private raf = 0;
   private lastTick = Date.now();
 

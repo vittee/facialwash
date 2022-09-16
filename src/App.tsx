@@ -21,6 +21,7 @@ import { getLuminance,
 
 import { chain, random, sortBy } from 'lodash';
 import { PlayHead } from 'components/PlayHead';
+import { Tags } from 'common/track';
 
 const defaultColors = [rgb(182, 244, 146), rgb(51, 139, 147)];
 
@@ -37,7 +38,8 @@ function findColor(base: string, predicate: (c: number) => boolean, fn: (deg: nu
 
 const App: React.FC = () => {
   const { state } = useOvermind();
-  const { next, nextLoading, currentTrackInfo: trackInfo } = state;
+  const { currentTrackInfo: trackInfo } = state;
+
   const track = trackInfo?.track;
 
   const lines = 8;
@@ -127,6 +129,9 @@ const App: React.FC = () => {
     }
   }
 
+  const next: Tags | undefined = undefined;
+  const nextLoading = false;
+
   return (
     <>
       <Cover ref={coverEl} />
@@ -148,9 +153,6 @@ const App: React.FC = () => {
 
         position={trackInfo?.position?.current ?? 0}
         duration={trackInfo?.position?.duration ?? 0}
-
-        next={[next?.artist, next?.title].filter(e => !!e).join(' - ')}
-        nextLoading={nextLoading}
 
         {...{ trackInfo }}
       />
