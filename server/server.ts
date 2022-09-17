@@ -1,16 +1,17 @@
 import _ from 'lodash';
 import http from 'http';
 import express, { Request } from 'express';
-import SocketIO from 'socket.io';
+import { Server as IOServer } from 'socket.io';
 import path from 'path';
 import { MedleyTrack, Tags, TrackInfo } from 'common/track';
+import { ServerEvents } from 'common/events';
 import { Lyrics, parseLyrics } from './lyrics';
 
 const splashy = require('splashy');
 
 const app = express();
 const server = http.createServer(app);
-const io = SocketIO(server);
+const io = new IOServer<{}, ServerEvents>(server);
 
 if (process.env.NODE_ENV !== 'development') {
   app.use(express.static(path.join(__dirname, '../build')));

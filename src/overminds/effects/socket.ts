@@ -1,7 +1,6 @@
-import io from 'socket.io-client';
+import { io, Socket } from 'socket.io-client';
 import { Tags, TrackInfo } from 'common/track';
-
-let socket: SocketIOClient.Socket;
+import { ServerEvents } from 'common/events';
 
 export interface OnTrack {
   (info: TrackInfo): void;
@@ -16,6 +15,8 @@ export interface OnNextStarted {
 }
 
 class SocketEffect {
+  private static socket: Socket<ServerEvents, {}>;
+
   onTrack: OnTrack | null = null;
 
   onNextLoaded: OnNextLoaded | null = null;
@@ -23,31 +24,26 @@ class SocketEffect {
   onNextStarted: OnNextStarted | null = null;
 
   init() {
-    socket = io();
+    SocketEffect.socket = io();
 
-    socket.on('track', this.handleOnTrack);
-    socket.on('next-loaded', this.handleOnNextLoaded);
-    socket.on('next-started', this.handleOnNextStarted);
+    SocketEffect.socket.on('track', this.handleOnTrack);
+    SocketEffect.socket.on('next-loaded', this.handleOnNextLoaded);
+    SocketEffect.socket.on('next-started', this.handleOnNextStarted);
   }
 
-  get(): SocketIOClient.Socket {
-    return socket!;
+  get(): Socket {
+    return SocketEffect.socket;
   }
 
-  // TODO: Remove any
-  private handleOnTrack = (info: TrackInfo, timestamp: any) => {
+  private handleOnTrack: ServerEvents['track'] = (info, timestamp) => {
     const latency = Date.now() - timestamp;
     info.position.current += latency;
     this.onTrack && this.onTrack(info);
   }
 
-  private handleOnNextLoaded = (tags: Tags) => {
-    this.onNextLoaded && this.onNextLoaded(tags);
-  }
+  private handleOnNextLoaded: ServerEvents['next-loaded'] = tags => this.onNextLoaded && this.onNextLoaded(tags);
 
-  private handleOnNextStarted = () => {
-    this.onNextStarted && this.onNextStarted();
-  }
+  private handleOnNextStarted: ServerEvents['next-started'] = () => this.onNextStarted && this.onNextStarted();
 }
 
 export default new SocketEffect();
