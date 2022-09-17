@@ -1,11 +1,10 @@
 import _ from 'lodash';
 import http from 'http';
-import express, { Request, Router } from 'express';
+import express, { Request } from 'express';
 import { Server as IOServer } from 'socket.io';
 import path from 'path';
-import { TrackPayload, Tags, TrackInfo } from 'common/track';
-import { ServerEvents } from 'common/events';
-import { Lyrics, parseLyrics } from './lyrics';
+import type { TrackPayload, Tags, TrackInfo, ServerEvents, Lyrics } from 'common/types';
+import { parseLyrics } from './lyrics';
 
 const splashy = require('splashy');
 
@@ -14,11 +13,8 @@ const server = http.createServer(app);
 const io = new IOServer<{}, ServerEvents>(server);
 
 if (process.env.NODE_ENV !== 'development') {
-  app.use(express.static(path.join(__dirname, '../build')));
-
-  app.get('/', function (req, res) {
-    res.sendFile(path.join(__dirname, '../build', 'index.html'));
-  });
+  const reactPath = path.join(__dirname, '../public');
+  app.use('/', express.static(reactPath));
 }
 
 app.use(express.json({ limit: '10mb' }));

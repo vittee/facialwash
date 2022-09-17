@@ -1,6 +1,6 @@
 import React, { createRef, PropsWithChildren } from "react";
 import classNames from "classnames";
-import { TrackInfo } from "common/track";
+import type { TrackInfo } from "common/types";
 import { clamp } from "lodash";
 import { Box, Container, Mask, Next, ProgressText } from "./elements";
 import { useOvermind } from "overminds";

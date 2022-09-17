@@ -1,4 +1,4 @@
-import { Track, TrackInfo } from "common/track";
+import type { Track, TrackInfo } from "common/types";
 import { Action } from ".";
 
 export const trackReceived: Action<TrackInfo> = ({ state }, info) => {

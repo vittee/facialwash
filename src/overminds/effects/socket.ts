@@ -1,6 +1,5 @@
 import { io, Socket } from 'socket.io-client';
-import { Tags, TrackInfo } from 'common/track';
-import { ServerEvents } from 'common/events';
+import type { Tags, TrackInfo, ServerEvents } from 'common/types';
 
 export interface OnTrack {
   (info: TrackInfo): void;

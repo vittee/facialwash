@@ -1,7 +1,4 @@
 import React, { useRef } from 'react';
-import { Lyrics, defaultColors as defaultLyricsColors } from 'components/Lyrics';
-import { Title } from 'components/Title';
-import { Cover } from 'components/Cover/Cover';
 import { useOvermind } from 'overminds';
 
 import { getLuminance,
@@ -19,11 +16,13 @@ import { getLuminance,
   radialGradient
 } from 'polished';
 
-import { chain, random, sortBy } from 'lodash';
+import { Lyrics, defaultColors as defaultLyricsColors } from 'components/Lyrics';
+import { Title } from 'components/Title';
+import { Cover } from 'components/Cover';
 import { PlayHead } from 'components/PlayHead';
-import { Tags } from 'common/track';
+import { chain, random, sortBy } from 'lodash';
 
-const defaultColors = [rgb(182, 244, 146), rgb(51, 139, 147)];
+const defaultCoverColors = [rgb(182, 244, 146), rgb(51, 139, 147)];
 
 function findColor(base: string, predicate: (c: number) => boolean, fn: (deg: number, base: string) => string) {
   let deg = 0.1;
@@ -87,7 +86,7 @@ const App: React.FC = () => {
       }).backgroundImage;
     } else {
       gradient = linearGradient({
-        colorStops: defaultColors,
+        colorStops: defaultCoverColors,
         toDirection: 'to right',
       }).backgroundImage;
     }

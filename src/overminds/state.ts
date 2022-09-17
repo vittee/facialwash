@@ -1,4 +1,4 @@
-import { Tags, TrackInfo } from "common/track";
+import type { Tags, TrackInfo } from "common/types";
 
 type State = {
   currentTrackInfo?: TrackInfo;

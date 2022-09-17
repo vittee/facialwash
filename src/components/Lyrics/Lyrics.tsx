@@ -1,8 +1,7 @@
 import React from 'react';
 import _ from 'lodash';
 import { Line, Container, Ticker, LineColors } from './elements';
-import { TrackInfo } from 'common/track';
-import { LyricLine } from '../../../server/lyrics';
+import type { TrackInfo, LyricLine } from 'common/types';
 
 interface Colors {
   background: string;

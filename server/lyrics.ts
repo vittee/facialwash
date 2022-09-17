@@ -1,24 +1,11 @@
+import type { LyricLine, Lyrics } from "common/types";
 import _, { clamp, reject, some } from "lodash";
-
-export type LyricLine = {
-  time: number;
-  text: string;
-  far?: boolean;
-}
-
-export type Timeline = LyricLine[];
 
 type Line = {
   infos: [string, string][];
   times: number[];
   text: string;
 }
-
-export type Lyrics = {
-  infos: Record<string, string[]>;
-  timeline: Timeline;
-}
-
 
 const attnExpr = /\[([^\]]*)\]/g;
 const infoExpr = /([^\d:]+):\s*(.*)\s*/;

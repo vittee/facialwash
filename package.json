@@ -3,8 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@types/react-dom": "18.0.6",
-    "@types/styled-components": "^5.1.9",
     "classnames": "^2.3.2",
     "express": "^4.17.1",
     "lodash": "^4.17.14",
@@ -45,12 +43,14 @@
     "@types/lodash": "^4.14.136",
     "@types/node": "16.11.17",
     "@types/react": "18.0.20",
+    "@types/react-dom": "18.0.6",
+    "@types/styled-components": "^5.1.26",
     "@vitejs/plugin-react": "^2.1.0",
     "npm-run-all": "^4.1.5",
     "sass": "^1.54.9",
     "tsx": "^3.9.0",
     "typescript": "4.8",
-    "vite": "^3.1.1",
+    "vite": "^3.1.2",
     "vite-tsconfig-paths": "^3.5.0"
   },
   "proxy": "http://localhost:4000"
