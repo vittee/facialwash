@@ -10,6 +10,9 @@ export default defineConfig({
   define: {
     'process.env': {
 
+    },
+    'process': {
+
     }
   },
   server: {
@@ -19,5 +22,8 @@ export default defineConfig({
         ws: true
       }
     }
+  },
+  build: {
+    outDir: 'build/public'
   }
 });

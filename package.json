@@ -19,9 +19,11 @@
   },
   "scripts": {
     "start": "run-p dev:*",
-    "build": "tsc --build && vite build",
     "dev:react": "vite",
-    "dev:server": "tsx watch --tsconfig tsconfig.server.json server/server.ts"
+    "dev:server": "tsx watch --tsconfig tsconfig.server.json server/server.ts",
+    "build": "run-s build:server build:react",
+    "build:react": "tsc --build && vite build",
+    "build:server": "tsc --project tsconfig.server.json && tsx scripts/package.ts"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -47,11 +49,17 @@
     "@types/styled-components": "^5.1.26",
     "@vitejs/plugin-react": "^2.1.0",
     "npm-run-all": "^4.1.5",
+    "rimraf": "^3.0.2",
     "sass": "^1.54.9",
     "tsx": "^3.9.0",
     "typescript": "4.8",
     "vite": "^3.1.2",
     "vite-tsconfig-paths": "^3.5.0"
+  },
+  "pnpm": {
+    "allowedDeprecatedVersions": {
+      "querystring": "*"
+    }
   },
   "proxy": "http://localhost:4000"
 }
