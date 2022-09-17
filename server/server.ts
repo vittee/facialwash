@@ -1,9 +1,9 @@
 import _ from 'lodash';
 import http from 'http';
-import express, { Request } from 'express';
+import express, { Request, Router } from 'express';
 import { Server as IOServer } from 'socket.io';
 import path from 'path';
-import { MedleyTrack, Tags, TrackInfo } from 'common/track';
+import { TrackPayload, Tags, TrackInfo } from 'common/track';
 import { ServerEvents } from 'common/events';
 import { Lyrics, parseLyrics } from './lyrics';
 
@@ -56,7 +56,7 @@ io.on('connection', socket => {
   }
 });
 
-app.post('/track', async (req: Request<{}, void, MedleyTrack>, res) => {
+app.post('/track', async (req: Request<{}, void, TrackPayload>, res) => {
   const { timing, track } = req.body;
 
   clearTickTimer();
@@ -107,7 +107,8 @@ app.post('/track', async (req: Request<{}, void, MedleyTrack>, res) => {
       duration: timing.position.duration
     },
     track: {
-      ...track,
+      tags: track.tags,
+      cover: track.cover,
       lyrics,
       colors
     }
@@ -121,7 +122,10 @@ app.post('/track', async (req: Request<{}, void, MedleyTrack>, res) => {
 })
 
 app.post('/next-loaded', (req: Request<{}, void, Tags>, res) => {
-  io.emit('next-loaded', req.body);
+  io.emit('next-loaded', {
+    artist: req.body.artist,
+    title: req.body.title
+  });
   res.end();
 });
 
