@@ -1,6 +1,6 @@
 {
   "name": "facialwash",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "dependencies": {
     "classnames": "^2.3.2",
@@ -21,9 +21,11 @@
     "start": "run-p dev:*",
     "dev:react": "vite",
     "dev:server": "tsx watch --tsconfig tsconfig.server.json server/server.ts",
-    "build": "run-s build:server build:react",
+    "build": "run-s clean build:server build:react",
     "build:react": "tsc --build && vite build",
-    "build:server": "tsc --project tsconfig.server.json && tsx scripts/package.ts"
+    "build:server": "tsc --project tsconfig.server.json && tsx scripts/package.ts",
+    "build:image": "run-s build && docker build . -t vittee/facialwash",
+    "clean": "rimraf build"
   },
   "eslintConfig": {
     "extends": "react-app"
