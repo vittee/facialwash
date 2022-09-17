@@ -129,9 +129,6 @@ const App: React.FC = () => {
     }
   }
 
-  const next: Tags | undefined = undefined;
-  const nextLoading = false;
-
   return (
     <>
       <Cover ref={coverEl} />

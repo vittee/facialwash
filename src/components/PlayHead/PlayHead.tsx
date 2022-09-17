@@ -2,7 +2,6 @@ import React, { createRef, PropsWithChildren } from "react";
 import classNames from "classnames";
 import { TrackInfo } from "common/track";
 import { clamp } from "lodash";
-import { setLightness, transparentize } from "polished";
 import { Box, Container, Mask, Next, ProgressText } from "./elements";
 import { useOvermind } from "overminds";
 
@@ -52,6 +51,8 @@ class InternalPlayHead extends React.Component<PropsWithChildren<Props>, State> 
 
   private containerRef = createRef<HTMLDivElement>();
 
+  private maskRef = createRef<HTMLDivElement>();
+
   state = {
     position: 0
   }
@@ -68,7 +69,13 @@ class InternalPlayHead extends React.Component<PropsWithChildren<Props>, State> 
         return {
           position: clamp(prev.position + delta, 0, this.props.duration)
         }
-      })
+      });
+
+      const progress = this.state.position / this.props.duration;
+
+      if (this.maskRef.current) {
+        this.maskRef.current.style.left = `${progress * 100}%`;
+      }
     });
   }
 
@@ -86,23 +93,7 @@ class InternalPlayHead extends React.Component<PropsWithChildren<Props>, State> 
     if (prev.trackInfo !== trackInfo) {
       this.lastTick = Date.now();
       this.setState({ position });
-    }
-  }
 
-  render() {
-    const { duration, next, nextLoading } = this.props;
-    const { position } = this.state;
-    const progress = position / duration;
-
-    const text = format(position);
-
-    // const textStyle: React.CSSProperties = {
-    //   clipPath: `inset(0 0 0 ${progress * 100}%)`,
-    //   backgroundColor: transparentize(0.2, this.props.backgroundColor),
-    //   color: setLightness(0.4, this.props.textColor)
-    // }
-
-    if (this.loadingNext && !next) {
       if (this.timer) {
         clearTimeout(this.timer);
       }
@@ -111,6 +102,13 @@ class InternalPlayHead extends React.Component<PropsWithChildren<Props>, State> 
         this.loadingNext = undefined;
       }, 4000);
     }
+  }
+
+  render() {
+    const { next, nextLoading } = this.props;
+    const { position } = this.state;
+
+    const text = format(position);
 
     let show = !!next;
     let loading = false;
@@ -138,7 +136,7 @@ class InternalPlayHead extends React.Component<PropsWithChildren<Props>, State> 
               {clockChars}
             </ProgressText>
 
-            <Mask style={{ left: `${progress * 100}%` }} />
+            <Mask ref={this.maskRef} />
           </Box>
         </Container>
 

@@ -28,6 +28,8 @@ export const Box = styled.div`
   white-space: nowrap;
   height: 1.0em;
   width: 10vw;
+
+  transition: width 2s ease, height 2s ease;
 `;
 
 
