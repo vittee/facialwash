@@ -55,7 +55,7 @@
     "sass": "^1.54.9",
     "tsx": "^3.9.0",
     "typescript": "4.8",
-    "vite": "^3.2.10",
+    "vite": "^3.2.11",
     "vite-tsconfig-paths": "^3.5.0"
   },
   "pnpm": {
