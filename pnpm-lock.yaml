@@ -15,8 +15,8 @@ importers:
         specifier: ^4.20.0
         version: 4.20.0
       lodash:
-        specifier: ^4.17.14
-        version: 4.17.21
+        specifier: ^4.17.23
+        version: 4.17.23
       overmind:
         specifier: 27.0.0
         version: 27.0.0
@@ -1359,8 +1359,8 @@ packages:
     resolution: {integrity: sha512-Kx8hMakjX03tiGTLAIdJ+lL0htKnXjEZN6hk/tozf/WOuYGdZBJrZ+rCJRbVCugsjB3jMLn9746NsQIf5VjBMw==}
     engines: {node: '>=4'}
 
-  lodash@4.17.21:
-    resolution: {integrity: sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==}
+  lodash@4.17.23:
+    resolution: {integrity: sha512-LgVTMpQtIopCi79SJeDiP0TfWi5CNEc/L/aRdTh3yIvmZXTnheWpKjSZhnvMl8iXbC1tFg9gdHHDMLoV7CnG+w==}
 
   loose-envify@1.4.0:
     resolution: {integrity: sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q==}
@@ -2593,7 +2593,7 @@ snapshots:
       '@babel/helper-annotate-as-pure': 7.18.6
       '@babel/helper-module-imports': 7.18.6
       babel-plugin-syntax-jsx: 6.18.0
-      lodash: 4.17.21
+      lodash: 4.17.23
       picomatch: 2.3.1
       styled-components: 5.3.5(react-dom@18.2.0(react@18.2.0))(react-is@18.2.0)(react@18.2.0)
 
@@ -3283,7 +3283,7 @@ snapshots:
       pify: 3.0.0
       strip-bom: 3.0.0
 
-  lodash@4.17.21: {}
+  lodash@4.17.23: {}
 
   loose-envify@1.4.0:
     dependencies:
@@ -3346,7 +3346,7 @@ snapshots:
       '@jimp/types': 0.16.2(@jimp/custom@0.16.2)
       '@types/lodash': 4.14.185
       '@types/node': 10.17.60
-      lodash: 4.17.21
+      lodash: 4.17.23
       url: 0.11.0
 
   non-blocking-json@1.1.1: {}
